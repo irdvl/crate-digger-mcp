@@ -94,6 +94,199 @@ wrangler.jsonc
 <files>
 This section contains the contents of the repository's files.
 
+<file path=".cursor/rules/vibe-tools.mdc">
+---
+description: Global Rule. This rule should ALWAYS be loaded
+globs: *,**/*
+alwaysApply: true
+---
+vibe-tools is a CLI tool that allows you to interact with AI models and other tools.
+vibe-tools is installed on this machine and it is available to you to execute. You're encouraged to use it.
+
+<vibe-tools Integration>
+# Instructions
+Use the following commands to get AI assistance:
+
+**Direct Model Queries:**
+`vibe-tools ask "<your question>" --provider <provider> --model <model>` - Ask any model from any provider a direct question (e.g., `vibe-tools ask "What is the capital of France?" --provider openai --model o3-mini`). Note that this command is generally less useful than other commands like `repo` or `plan` because it does not include any context from your codebase or repository. In general you should not use the ask command because it does not include any context. The other commands like `web`, `doc`, `repo`, or `plan` are usually better. If you are using it, make sure to include in your question all the information and context that the model might need to answer usefully.
+
+**Ask Command Options:**
+--provider=<provider>: AI provider to use (openai, anthropic, perplexity, gemini, modelbox, openrouter, or xai)
+--model=<model>: Model to use (required for the ask command)
+--reasoning-effort=<low|medium|high>: Control the depth of reasoning for supported models (OpenAI o1/o3-mini models and Claude 4 Sonnet). Higher values produce more thorough responses for complex questions.
+--with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context. Can be specified multiple times (e.g., `--with-doc=<url1> --with-doc=<url2>`).
+
+**Implementation Planning:**
+`vibe-tools plan "<query>"` - Generate a focused implementation plan using AI (e.g., `vibe-tools plan "Add user authentication to the login page"`)
+The plan command uses multiple AI models to:
+1. Identify relevant files in your codebase (using Gemini by default)
+2. Extract content from those files
+3. Generate a detailed implementation plan (using OpenAI o3-mini by default)
+
+**Plan Command Options:**
+--fileProvider=<provider>: Provider for file identification (gemini, openai, anthropic, perplexity, modelbox, openrouter, or xai)
+--thinkingProvider=<provider>: Provider for plan generation (gemini, openai, anthropic, perplexity, modelbox, openrouter, or xai)
+--fileModel=<model>: Model to use for file identification
+--thinkingModel=<model>: Model to use for plan generation
+--with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context for both file identification and planning. Can be specified multiple times (e.g., `--with-doc=<url1> --with-doc=<url2>`).
+
+**Web Search:**
+`vibe-tools web "<your question>"` - Get answers from the web using a provider that supports web search (e.g., Perplexity models and Gemini Models either directly or from OpenRouter or ModelBox) (e.g., `vibe-tools web "latest shadcn/ui installation instructions"`)
+Note: web is a smart autonomous agent with access to the internet and an extensive up to date knowledge base. Web is NOT a web search engine. Always ask the agent for what you want using a proper sentence, do not just send it a list of keywords. In your question to web include the context and the goal that you're trying to acheive so that it can help you most effectively.
+when using web for complex queries suggest writing the output to a file somewhere like local-research/<query summary>.md.
+
+**IMPORTANT: Do NOT use the `web` command for specific URLs.** If a user provides a specific URL (documentation link, GitHub repo, article, etc.), you should always use commands that support the `--with-doc` parameter instead, such as `repo`, `plan`, `doc`, or `ask`. Using `--with-doc` ensures the exact content of the URL is processed correctly and completely.
+
+**Web Command Options:**
+--provider=<provider>: AI provider to use (perplexity, gemini, modelbox, or openrouter)
+
+**Repository Context:**
+`vibe-tools repo "<your question>" [--subdir=<path>] [--from-github=<username/repo>] [--with-doc=<doc_url>...]` - Get context-aware answers about this repository using Google Gemini (e.g., `vibe-tools repo "explain authentication flow"`)
+Use the optional `--subdir` parameter to analyze a specific subdirectory instead of the entire repository (e.g., `vibe-tools repo "explain the code structure" --subdir=src/components`). Use the optional `--from-github` parameter to analyze a remote GitHub repository without cloning it locally (e.g., `vibe-tools repo "explain the authentication system" --from-github=username/repo-name`). Use the optional `--with-doc` parameter multiple times to include content from several URLs as additional context (e.g., `vibe-tools repo "summarize findings" --with-doc=https://example.com/spec1 --with-doc=https://example.com/spec2`).
+
+**Documentation Generation:**
+`vibe-tools doc [options] [--with-doc=<doc_url>...]` - Generate comprehensive documentation for this repository (e.g., `vibe-tools doc --output docs.md`). Can incorporate document context from multiple URLs (e.g., `vibe-tools doc --with-doc=https://example.com/existing-docs --with-doc=https://example.com/new-spec`).
+
+**YouTube Video Analysis:**
+`vibe-tools youtube "<youtube-url>" [question] [--type=<summary|transcript|plan|review|custom>]` - Analyze YouTube videos and generate detailed reports (e.g., `vibe-tools youtube "https://youtu.be/43c-Sm5GMbc" --type=summary`)
+Note: The YouTube command requires a `GEMINI_API_KEY` to be set in your environment or .vibe-tools.env file as the GEMINI API is the only interface that supports YouTube analysis.
+
+**GitHub Information:**
+`vibe-tools github pr [number]` - Get the last 10 PRs, or a specific PR by number (e.g., `vibe-tools github pr 123`)
+`vibe-tools github issue [number]` - Get the last 10 issues, or a specific issue by number (e.g., `vibe-tools github issue 456`)
+
+**ClickUp Information:**
+`vibe-tools clickup task <task_id>` - Get detailed information about a ClickUp task including description, comments, status, assignees, and metadata (e.g., `vibe-tools clickup task "task_id"`)
+
+**Wait Command:**
+`vibe-tools wait <seconds>` - Pauses execution for the specified number of seconds (e.g., `vibe-tools wait 5` to wait for 5 seconds).
+
+**Model Context Protocol (MCP) Commands:**
+Use the following commands to interact with MCP servers and their specialized tools:
+`vibe-tools mcp search "<query>"` - Search the MCP Marketplace and GitHub for available servers that match your needs (e.g., `vibe-tools mcp search "git repository management"`)
+`vibe-tools mcp run "<query>"` - Execute MCP server tools using natural language queries (e.g., `vibe-tools mcp run "list files in the current directory" --provider=openrouter`). The query must include sufficient information for vibe-tools to determine which server to use, provide plenty of context.
+
+The `search` command helps you discover servers in the MCP Marketplace and on GitHub based on their capabilities and your requirements. The `run` command automatically selects and executes appropriate tools from these servers based on your natural language queries. If you want to use a specific server include the server name in your query. E.g. `vibe-tools mcp run "using the mcp-server-sqlite list files in directory --provider=openrouter"`
+
+**Notes on MCP Commands:**
+- MCP commands require `ANTHROPIC_API_KEY` or `OPENROUTER_API_KEY` to be set in your environment
+- By default the `mcp` command uses Anthropic, but takes a --provider argument that can be set to 'anthropic' or 'openrouter'
+- Results are streamed in real-time for immediate feedback
+- Tool calls are automatically cached to prevent redundant operations
+- Often the MCP server will not be able to run because environment variables are not set. If this happens ask the user to add the missing environment variables to the cursor tools env file at ~/.vibe-tools/.env
+
+**Stagehand Browser Automation:**
+`vibe-tools browser open <url> [options]` - Open a URL and capture page content, console logs, and network activity (e.g., `vibe-tools browser open "https://example.com" --html`)
+`vibe-tools browser act "<instruction>" --url=<url | 'current'> [options]` - Execute actions on a webpage using natural language instructions (e.g., `vibe-tools browser act "Click Login" --url=https://example.com`)
+`vibe-tools browser observe "<instruction>" --url=<url> [options]` - Observe interactive elements on a webpage and suggest possible actions (e.g., `vibe-tools browser observe "interactive elements" --url=https://example.com`)
+`vibe-tools browser extract "<instruction>" --url=<url> [options]` - Extract data from a webpage based on natural language instructions (e.g., `vibe-tools browser extract "product names" --url=https://example.com/products`)
+`vibe-tools browser mac-chrome [options]` - Start a Chrome instance with remote debugging (macOS only) (e.g., `vibe-tools browser mac-chrome --debug`, `vibe-tools browser mac-chrome --lite`)
+
+**Notes on Browser Commands:**
+- All browser commands are stateless unless --connect-to is used to connect to a long-lived interactive session. In disconnected mode each command starts with a fresh browser instance and closes it when done.
+- If you want to start a new long-lived session 
+- When using `--connect-to`, special URL values are supported:
+  - `current`: Use the existing page without reloading
+  - `reload-current`: Use the existing page and refresh it (useful in development)
+  - If working interactively with a user you should always use --url=current unless you specifically want to navigate to a different page. Setting the url to anything else will cause a page refresh loosing current state.
+- Multi step workflows involving state or combining multiple actions are supported in the `act` command using the pipe (|) separator (e.g., `vibe-tools browser act "Click Login | Type 'user@example.com' into email | Click Submit" --url=https://example.com`)
+- Video recording is available for all browser commands using the `--video=<directory>` option. This will save a video of the entire browser interaction at 1280x720 resolution. The video file will be saved in the specified directory with a timestamp.
+- DO NOT ask browser act to "wait" for anything, the wait command is currently disabled in Stagehand.
+
+**Tool Recommendations:**
+- `vibe-tools web` is best for general web information not specific to the repository. Generally call this without additional arguments.
+- `vibe-tools repo` is ideal for repository-specific questions, planning, code review and debugging. E.g. `vibe-tools repo "Review recent changes to command error handling looking for mistakes, omissions and improvements"`. Generally call this without additional arguments.
+- `vibe-tools plan` is ideal for planning tasks. E.g. `vibe-tools plan "Adding authentication with social login using Google and Github"`. Generally call this without additional arguments.
+- `vibe-tools doc` generates documentation for local or remote repositories.
+- `vibe-tools youtube` analyzes YouTube videos to generate summaries, transcripts, implementation plans, or custom analyses
+- `vibe-tools browser` is useful for testing and debugging web apps and uses Stagehand
+- `vibe-tools mcp` enables interaction with specialized tools through MCP servers (e.g., for Git operations, file system tasks, or custom tools)
+- **URLS:** For any specific URL (documentation, article, reference, spec, GitHub repo, etc.), ALWAYS use a command with the `--with-doc=<url>` parameter rather than the `web` command. Examples: `vibe-tools repo "How should I implement this feature based on the spec?" --with-doc=https://example.com/spec.pdf` or `vibe-tools ask "What does this document say about authentication?" --with-doc=https://example.com/auth-doc.html`
+- When implementing features based on documentation, specifications, or any external content, always use the `--with-doc=<url>` flag instead of built-in web search. For example: `vibe-tools plan "Implement login page according to specs" --with-doc=https://example.com/specs.pdf` or `vibe-tools repo "How should I implement this feature?" --with-doc=https://example.com/feature-spec.md`.
+- When a user provides a specific URL for documentation or reference material, always use the `--with-doc=<url>` flag with that URL rather than attempting to search for or summarize the content independently. This ensures the exact document is used as context.
+
+**Running Commands:**
+1. Use `vibe-tools <command>` to execute commands (make sure vibe-tools is installed globally using npm install -g vibe-tools so that it is in your PATH)
+
+**General Command Options (Supported by all commands):**
+--provider=<provider>: AI provider to use (openai, anthropic, perplexity, gemini, openrouter, modelbox, or xai). If provider is not specified, the default provider for that task will be used.
+--model=<model name>: Specify an alternative AI model to use. If model is not specified, the provider's default model for that task will be used.
+--max-tokens=<number>: Control response length
+--save-to=<file path>: Save command output to a file (in *addition* to displaying it)
+--debug: Show detailed logs and error information
+--web: Enable web search capabilities for supported models (currently Gemini models) across all commands
+
+**Repository Command Options:**
+--provider=<provider>: AI provider to use (gemini, openai, openrouter, perplexity, modelbox, anthropic, or xai)
+--model=<model>: Model to use for repository analysis
+--max-tokens=<number>: Maximum tokens for response
+--from-github=<GitHub username>/<repository name>[@<branch>]: Analyze a remote GitHub repository without cloning it locally
+--subdir=<path>: Analyze a specific subdirectory instead of the entire repository
+--with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context. Can be specified multiple times.
+
+**Documentation Command Options:**
+--from-github=<GitHub username>/<repository name>[@<branch>]: Generate documentation for a remote GitHub repository
+--provider=<provider>: AI provider to use (gemini, openai, openrouter, perplexity, modelbox, anthropic, or xai)
+--model=<model>: Model to use for documentation generation
+--max-tokens=<number>: Maximum tokens for response
+--with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context. Can be specified multiple times.
+
+**YouTube Command Options:**
+--type=<summary|transcript|plan|review|custom>: Type of analysis to perform (default: summary)
+
+**GitHub Command Options:**
+--from-github=<GitHub username>/<repository name>[@<branch>]: Access PRs/issues from a specific GitHub repository
+
+**Browser Command Options (for 'open', 'act', 'observe', 'extract'):**
+--console: Capture browser console logs (enabled by default, use --no-console to disable)
+--html: Capture page HTML content (disabled by default)
+--network: Capture network activity (enabled by default, use --no-network to disable)
+--screenshot=<file path>: Save a screenshot of the page
+--timeout=<milliseconds>: Set navigation timeout (default: 120000ms for Stagehand operations, 30000ms for navigation)
+--viewport=<width>x<height>: Set viewport size (e.g., 1280x720). When using --connect-to, viewport is only changed if this option is explicitly provided
+--headless: Run browser in headless mode (default: true)
+--no-headless: Show browser UI (non-headless mode) for debugging
+--connect-to=<port>: Connect to existing Chrome instance. Special values: 'current' (use existing page), 'reload-current' (refresh existing page)
+--wait=<time:duration or selector:css-selector>: Wait after page load (e.g., 'time:5s', 'selector:#element-id')
+--video=<directory>: Save a video recording (1280x720 resolution, timestamped subdirectory). Not available when using --connect-to
+--url=<url>: Required for `act`, `observe`, and `extract` commands. Url to navigate to before the main command or one of the special values 'current' (to stay on the current page without navigating or reloading) or 'reload-current' (to reload the current page)
+--evaluate=<string>: JavaScript code to execute in the browser before the main command
+
+**Nicknames**
+Users can ask for these tools using nicknames
+Gemini is a nickname for vibe-tools repo
+Perplexity is a nickname for vibe-tools web
+Stagehand is a nickname for vibe-tools browser
+If people say "ask Gemini" or "ask Perplexity" or "ask Stagehand" they mean to use the `vibe-tools` command with the `repo`, `web`, or `browser` commands respectively.
+
+**Xcode Commands:**
+`vibe-tools xcode build [buildPath=<path>] [destination=<destination>]` - Build Xcode project and report errors.
+**Build Command Options:**
+--buildPath=<path>: (Optional) Specifies a custom directory for derived build data. Defaults to ./.build/DerivedData.
+--destination=<destination>: (Optional) Specifies the destination for building the app (e.g., 'platform=iOS Simulator,name=iPhone 16 Pro'). Defaults to 'platform=iOS Simulator,name=iPhone 16 Pro'.
+
+`vibe-tools xcode run [destination=<destination>]` - Build and run the Xcode project on a simulator.
+**Run Command Options:**
+--destination=<destination>: (Optional) Specifies the destination simulator (e.g., 'platform=iOS Simulator,name=iPhone 16 Pro'). Defaults to 'platform=iOS Simulator,name=iPhone 16 Pro'.
+
+`vibe-tools xcode lint` - Run static analysis on the Xcode project to find and fix issues.
+
+**Additional Notes:**
+- For detailed information, see `node_modules/vibe-tools/README.md` (if installed locally).
+- Configuration is in `vibe-tools.config.json` (or `~/.vibe-tools/config.json`).
+- API keys are loaded from `.vibe-tools.env` (or `~/.vibe-tools/.env`).
+- ClickUp commands require a `CLICKUP_API_TOKEN` to be set in your `.vibe-tools.env` file.
+- Available models depend on your configured provider (OpenAI, Anthropic, xAI, etc.) in `vibe-tools.config.json`.
+- repo has a limit of 2M tokens of context. The context can be reduced by filtering out files in a .repomixignore file.
+- problems running browser commands may be because playwright is not installed. Recommend installing playwright globally.
+- MCP commands require `ANTHROPIC_API_KEY` or `OPENROUTER_API_KEY`
+- **Remember:** You're part of a team of superhuman expert AIs. Work together to solve complex problems.
+- **Repomix Configuration:** You can customize which files are included/excluded during repository analysis by creating a `repomix.config.json` file in your project root. This file will be automatically detected by `repo`, `plan`, and `doc` commands.
+
+<!-- vibe-tools-version: 0.62.7 -->
+</vibe-tools Integration>
+</file>
+
 <file path="src/handlers/analyzeYoutubeMix.ts">
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -321,9 +514,16 @@ export class AnalyzeYoutubeMixHandler {
       soundcloud: found.filter(r => r.source === 'soundcloud').length,
       youtube: found.filter(r => r.source === 'youtube').length
     };
-    const qualities = found.map(r => r.quality).filter(Boolean) as string[];
-    const averageQuality = qualities.length > 0
-      ? qualities.reduce((acc, q) => acc + q, '')
+    // Calculate the most frequent quality (mode)
+    const qualityCounts = found
+      .map(r => r.quality)
+      .filter(Boolean)
+      .reduce((acc, quality) => {
+        acc[quality!] = (acc[quality!] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+    const averageQuality = Object.keys(qualityCounts).length > 0
+      ? Object.entries(qualityCounts).reduce((a, b) => qualityCounts[a[0]] > qualityCounts[b[0]] ? a : b)[0]
       : 'unknown';
     // Estimate cost (very rough approximation)
     const estimatedCost = 0.0008; // Base cost per mix as specified in project description
@@ -334,7 +534,8 @@ export class AnalyzeYoutubeMixHandler {
       processingTime,
       sourcesUsed,
       averageQuality: averageQuality as any,
-      estimatedCost
+      estimatedCost,
+      modelUsed: 'gpt-4o-mini' // The model used for track parsing
     };
   }
   private generateWarnings(results: TrackSearchResult[], args: AnalyzeYoutubeMixArgs): string[] {
@@ -370,7 +571,7 @@ export class CleanTracksOnlyHandler {
     const logger = new Logger('clean-only');
     logger.info('handler', 'Starting track cleaning only', {
       trackCount: args.tracks.length,
-      provider: args.provider || 'openai'
+      provider: args.provider || 'anthropic'
     });
     try {
       // Validate input
@@ -594,11 +795,9 @@ export class GenerateScriptOnlyHandler {
 
 <file path="src/services/llm/llmService.ts">
 import { CleanedTrack, ServiceError, ErrorCode, WorkerConfig } from '../../types';
-interface OpenAIResponse {
-  choices?: Array<{
-    message?: {
-      content?: string;
-    };
+interface AnthropicResponse {
+  content?: Array<{
+    text?: string;
   }>;
 }
 export class LLMService {
@@ -622,14 +821,14 @@ Output ONLY valid JSON array, no other text.`;
   constructor(private config: WorkerConfig) {}
   async parseTracklist(rawText: string): Promise<CleanedTrack[]> {
     try {
-      const response = await this.callOpenAI({
-        model: 'gpt-4o-mini',
+      const model = this.config.ANTHROPIC_MODEL || 'claude-3-5-haiku';
+      const response = await this.callAnthropic({
+        model: model,
         messages: [
-          { role: 'system', content: this.prompt },
-          { role: 'user', content: rawText }
+          { role: 'user', content: this.prompt + '\n\n' + rawText }
         ],
-        temperature: 0.3,
-        max_tokens: 2000
+        max_tokens: 2000,
+        temperature: 0.3
       });
       return this.validateAndTransform(JSON.parse(response));
     } catch (error) {
@@ -643,12 +842,13 @@ Output ONLY valid JSON array, no other text.`;
       );
     }
   }
-  private async callOpenAI(requestBody: any): Promise<string> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  private async callAnthropic(requestBody: any): Promise<string> {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.config.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
+        'Authorization': `Bearer ${this.config.ANTHROPIC_API_KEY}`,
+        'Content-Type': 'application/json',
+        'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify(requestBody)
     });
@@ -656,19 +856,19 @@ Output ONLY valid JSON array, no other text.`;
       const errorText = await response.text();
       throw new ServiceError(
         ErrorCode.LLM_PARSE_FAILED,
-        `OpenAI API error: ${response.status} ${response.statusText} - ${errorText}`,
+        `Anthropic API error: ${response.status} ${response.statusText} - ${errorText}`,
         response.status >= 500 // Retry on server errors
       );
     }
-    const data = await response.json() as OpenAIResponse;
-    if (!data.choices || !data.choices[0] || !data.choices[0].message) {
+    const data = await response.json() as AnthropicResponse;
+    if (!data.content || !data.content[0] || !data.content[0].text) {
       throw new ServiceError(
         ErrorCode.LLM_PARSE_FAILED,
-        'Invalid response format from OpenAI API',
+        'Invalid response format from Anthropic API',
         false
       );
     }
-    return data.choices[0].message.content || '';
+    return data.content[0].text || '';
   }
   private validateAndTransform(rawResponse: any): CleanedTrack[] {
     if (!Array.isArray(rawResponse)) {
@@ -721,9 +921,9 @@ Output ONLY valid JSON array, no other text.`;
   }
   // Calculate estimated cost for the API call
   calculateCost(inputTokens: number, outputTokens: number): number {
-    // GPT-4o-mini pricing: $0.15/1M input tokens, $0.60/1M output tokens
-    const inputCost = (inputTokens / 1000000) * 0.15;
-    const outputCost = (outputTokens / 1000000) * 0.60;
+    // Claude 3.5 Haiku pricing: $0.80/1M input tokens, $4.00/1M output tokens
+    const inputCost = (inputTokens / 1000000) * 0.80;
+    const outputCost = (outputTokens / 1000000) * 4.00;
     return inputCost + outputCost;
   }
 }
@@ -1169,6 +1369,7 @@ export interface ProcessingSummary {
   };
   averageQuality: '320kbps' | '256kbps' | '192kbps' | '128kbps' | 'unknown';  // More specific quality values
   estimatedCost: number;  // in USD
+  modelUsed: string;      // Which LLM model was used
 }
 export interface DownloadScript {
   scriptContent: string;  // Base64 encoded
@@ -1180,8 +1381,9 @@ export interface DownloadScript {
 // Configuration
 export interface WorkerConfig {
   // Environment variables
-  OPENAI_API_KEY: string;
-  SOUNDCLOUD_CLIENT_ID?: string;  // Optional, with fallbacks
+  ANTHROPIC_API_KEY: string;
+  ANTHROPIC_MODEL?: string;        // Default: "claude-3-5-haiku"
+  SOUNDCLOUD_CLIENT_ID?: string;   // Optional, with fallbacks
   // Operational limits
   MAX_CONCURRENT_SEARCHES: number;  // Default: 3
   RATE_LIMIT_DELAY_MS: number;     // Default: 1000
@@ -1220,7 +1422,8 @@ export interface ExtractTracksOnlyResult {
 }
 export interface CleanTracksOnlyArgs {
   tracks: string[];
-  provider?: 'openai';
+  provider?: 'anthropic';
+  model?: string;
 }
 export interface CleanTracksOnlyResult {
   cleaned: CleanedTrack[];
@@ -1272,7 +1475,8 @@ export interface LogEntry {
 // Configuration loader
 export function loadWorkerConfig(env: any): WorkerConfig {
   return {
-    OPENAI_API_KEY: env.OPENAI_API_KEY,
+    ANTHROPIC_API_KEY: env.ANTHROPIC_API_KEY,
+    ANTHROPIC_MODEL: env.ANTHROPIC_MODEL || 'claude-3-5-haiku',
     SOUNDCLOUD_CLIENT_ID: env.SOUNDCLOUD_CLIENT_ID,
     MAX_CONCURRENT_SEARCHES: parseInt(env.MAX_CONCURRENT_SEARCHES || '3'),
     RATE_LIMIT_DELAY_MS: parseInt(env.RATE_LIMIT_DELAY_MS || '1000'),
@@ -1489,1010 +1693,6 @@ export class Validation {
 }
 </file>
 
-<file path=".repomixignore">
-# Dependencies
-node_modules/
-package-lock.json
-
-# Build outputs
-dist/
-build/
-*.tsbuildinfo
-
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Coverage directory used by tools like istanbul
-coverage/
-
-# Temporary folders
-tmp/
-temp/
-
-# Static assets that don't need analysis
-static/img/
-img/
-</file>
-
-<file path="project_description.md">
-# DJ Mix Track Downloader MCP Server - Unified Design Document
-
-## Executive Summary
-
-The DJ Mix Track Downloader is a Model Context Protocol (MCP) server deployed as a Cloudflare Worker that analyzes YouTube DJ mix videos, extracts track lists from descriptions/chapters, cleans track names using GPT-4-mini, searches for high-quality download URLs using a waterfall approach (NotSlider → SoundCloud → YouTube-dl fallback), and generates executable shell scripts for downloading tracks. The service prioritizes 320kbps MP3 files, operates within Cloudflare's constraints (10MB bundle, 128MB RAM, 5-minute CPU limit), and costs approximately $0.0008 per mix processed.
-
-## 1. PROJECT OVERVIEW
-
-### 1.1 Purpose
-Create an MCP server for educational/personal use that automates the process of:
-- Extracting track lists from YouTube DJ mixes
-- Finding high-quality (320kbps) download sources
-- Generating download scripts with quality reporting
-
-### 1.2 Core Workflow
-```
-YouTube URL → Extract Tracks → LLM Cleanup → Multi-Platform Search → Download Script + Report
-```
-
-### 1.3 Key Constraints
-- **Runtime**: Cloudflare Workers (no binary execution, no ffmpeg/yt-dlp)
-- **Memory**: 128MB per isolate (hard limit)
-- **CPU Time**: 5 minutes maximum per request
-- **Bundle Size**: ≤10MB compressed (paid plan)
-- **Cost Target**: <$25/month (~30 mixes/day)
-
-## 2. TECHNOLOGY STACK
-
-### 2.1 Core Technologies
-| Component | Technology | Rationale |
-|-----------|------------|-----------|
-| Runtime | Cloudflare Workers | Edge deployment, no server ops |
-| Language | TypeScript 5.x | Type safety, native Worker support |
-| Framework | MCP SDK TypeScript v1.0.0+ | Standardized protocol |
-| LLM | OpenAI GPT-4-mini | Cost-effective ($0.40/1M in, $1.60/1M out) |
-| Primary Source | NotSlider.nl | Guaranteed 320kbps MP3s |
-| Package Manager | npm + Wrangler 3.x | Cloudflare standard tooling |
-| Testing | Vitest + MSW | Worker-compatible testing |
-
-### 2.2 Dependencies
-```json
-{
-  "dependencies": {
-    "@modelcontextprotocol/sdk-typescript": "^1.0.0",
-    "node-fetch": "^3.3.2",
-    "cheerio": "^1.0.0-rc.12",
-    "uuid": "^9.0.1"
-  },
-  "devDependencies": {
-    "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "wrangler": "^3.0.0",
-    "vitest": "^2.0.0",
-    "msw": "^2.0.0"
-  }
-}
-```
-
-### 2.3 Platform Integrations
-1. **YouTube** - Track extraction via HTML scraping
-2. **NotSlider.nl** - Primary 320kbps MP3 source
-3. **SoundCloud API v2** - Secondary source (optional)
-4. **YouTube-dl API** - Tertiary fallback (external service)
-5. **OpenAI API** - Track name cleanup
-
-## 3. SYSTEM ARCHITECTURE
-
-### 3.1 Repository Structure
-```
-dj-mix-downloader-mcp/
-├── wrangler.toml
-├── .dev.vars.example        # OPENAI_API_KEY, SOUNDCLOUD_CLIENT_ID
-├── src/
-│   ├── index.ts            # MCP server entry point
-│   ├── handlers/
-│   │   ├── analyzeYoutubeMix.ts
-│   │   ├── extractTracksOnly.ts
-│   │   ├── cleanTracksOnly.ts
-│   │   └── generateScriptOnly.ts
-│   ├── services/
-│   │   ├── youtube/
-│   │   │   ├── fetchHtml.ts
-│   │   │   ├── extractChapters.ts
-│   │   │   └── extractDescription.ts
-│   │   ├── llm/
-│   │   │   └── parseTracklist.ts
-│   │   ├── resolver/
-│   │   │   ├── notslider.ts
-│   │   │   ├── soundcloud.ts
-│   │   │   └── youtubeDl.ts
-│   │   └── script/
-│   │       └── buildScript.ts
-│   ├── types/
-│   │   └── index.ts
-│   └── utils/
-│       ├── logger.ts
-│       ├── rateLimiter.ts
-│       └── validation.ts
-└── test/
-    └── *.spec.ts
-```
-
-### 3.2 Data Flow Diagram
-```
-1. MCP Request (analyzeYoutubeMix)
-   │
-   ├─▶ 2. YouTube HTML Fetch (25s timeout)
-   │      └─▶ Extract chapters (JSON-LD) or description
-   │
-   ├─▶ 3. LLM Track Parsing (GPT-4-mini)
-   │      └─▶ Structured JSON: [{artist, title, certainty}]
-   │
-   ├─▶ 4. Multi-Platform Search (concurrent, rate-limited)
-   │      ├─▶ NotSlider (320kbps MP3)
-   │      ├─▶ SoundCloud (if NotSlider fails)
-   │      └─▶ YouTube-dl API (last resort)
-   │
-   ├─▶ 5. Download Script Generation
-   │      └─▶ Bash script with wget/curl commands
-   │
-   └─▶ 6. Response with script + quality report
-```
-
-## 4. DATA MODELS
-
-### 4.1 Core Types
-```typescript
-// Track representation through the pipeline
-interface RawTrack {
-  index: number;
-  timestamp?: string;      // "1:23:45" format
-  rawText: string;        // Original text from YouTube
-}
-
-interface CleanedTrack {
-  index: number;
-  original: string;
-  artist: string;
-  title: string;
-  remixInfo?: string;     // "(Remix Artist Remix)"
-  certainty: number;      // 0.0-1.0 from LLM
-  isValid: boolean;
-}
-
-interface TrackSearchResult {
-  track: CleanedTrack;
-  found: boolean;
-  source?: 'notslider' | 'soundcloud' | 'youtube';
-  downloadUrl?: string;
-  quality?: string;       // "320kbps", "256kbps", etc.
-  format?: 'mp3' | 'm4a' | 'opus';
-  duration?: number;      // seconds
-  fileSize?: number;      // bytes
-  error?: string;
-}
-
-// Response types
-interface ProcessingSummary {
-  totalTracks: number;
-  foundTracks: number;
-  failedTracks: number;
-  processingTime: number;
-  sourcesUsed: {
-    notslider: number;
-    soundcloud: number;
-    youtube: number;
-  };
-  averageQuality: string;
-  estimatedCost: number;  // in USD
-}
-
-interface DownloadScript {
-  scriptContent: string;  // Base64 encoded
-  fileName: string;
-  mixTitle: string;
-  timestamp: string;
-  trackCount: number;
-}
-```
-
-### 4.2 Configuration
-```typescript
-interface WorkerConfig {
-  // Environment variables
-  OPENAI_API_KEY: string;
-  SOUNDCLOUD_CLIENT_ID?: string;  // Optional, with fallbacks
-
-  // Operational limits
-  MAX_CONCURRENT_SEARCHES: number;  // Default: 3
-  RATE_LIMIT_DELAY_MS: number;     // Default: 1000
-  REQUEST_TIMEOUT_MS: number;       // Default: 25000
-
-  // Quality preferences
-  PREFERRED_QUALITY: '320kbps' | '256kbps' | 'highest';
-  PREFERRED_FORMAT: 'mp3' | 'm4a' | 'any';
-
-  // Service URLs
-  NOTSLIDER_BASE_URL: string;      // Default: "https://notslider.nl"
-  YOUTUBE_DL_API_URL?: string;     // External service endpoint
-}
-```
-
-## 5. MCP HANDLERS
-
-### 5.1 Primary Handler
-```typescript
-// Handler: analyzeYoutubeMix
-// Description: Complete pipeline from YouTube URL to download script
-
-interface AnalyzeYoutubeMixArgs {
-  url: string;                    // YouTube URL (required)
-  skipLLMCleanup?: boolean;      // Default: false
-  customOutputPath?: string;     // Default: "./downloads"
-  maxTracks?: number;            // Limit processing (default: unlimited)
-}
-
-interface AnalyzeYoutubeMixResult {
-  success: boolean;
-  id: string;                    // Unique job ID
-  downloadScript: DownloadScript;
-  qualityReport: QualityReport[];
-  summary: ProcessingSummary;
-  failedTracks: string[];
-  warnings: string[];
-}
-```
-
-### 5.2 Utility Handlers
-```typescript
-// Extract tracks without processing
-interface ExtractTracksOnly {
-  args: { url: string; includeTimestamps?: boolean };
-  result: {
-    mixTitle: string;
-    trackCount: number;
-    tracks: RawTrack[];
-  };
-}
-
-// Clean tracks via LLM
-interface CleanTracksOnly {
-  args: { tracks: string[]; provider?: 'openai' };
-  result: { cleaned: CleanedTrack[]; cost: number };
-}
-
-// Generate script from results
-interface GenerateScriptOnly {
-  args: {
-    searchResults: TrackSearchResult[];
-    mixTitle: string;
-  };
-  result: { script: DownloadScript };
-}
-```
-
-## 6. SERVICE IMPLEMENTATIONS
-
-### 6.1 YouTube Extraction Service
-```typescript
-class YouTubeService {
-  private readonly timeout = 25000;
-
-  async fetchHtml(url: string): Promise<string> {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
-
-    try {
-      const response = await fetch(url, {
-        signal: controller.signal,
-        cf: { cacheTtl: 300 } // 5-minute edge cache
-      });
-      return await response.text();
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  }
-
-  extractChapters(html: string): RawTrack[] | null {
-    // Extract JSON-LD VideoObject.hasPart
-    const jsonLdMatch = html.match(
-      /<script[^>]+type="application\/ld\+json"[^>]*>([^<]+)<\/script>/
-    );
-
-    if (jsonLdMatch) {
-      const data = JSON.parse(jsonLdMatch[1]);
-      // Parse hasPart array for Clip objects
-      return this.parseChapters(data);
-    }
-    return null;
-  }
-
-  extractDescription(html: string): string {
-    // Fallback to raw description
-    const match = html.match(/"shortDescription":"(.*?)"/);
-    return match ? this.unescapeDescription(match[1]) : '';
-  }
-}
-```
-
-### 6.2 LLM Track Parser
-```typescript
-class LLMService {
-  private readonly prompt = `
-You are given raw text from a DJ mix. Extract an ordered JSON array of tracks.
-Each item must have:
-{
-  "index": number,
-  "artist": string,
-  "title": string,
-  "remixInfo": string or null,
-  "certainty": float 0-1
-}
-
-Rules:
-- Remove "feat.", "ft.", "featuring" from artist names
-- Extract remix info like "(Remix Name Remix)"
-- Set certainty based on confidence in parsing
-- Mark unclear entries with certainty < 0.5
-
-Output ONLY valid JSON array, no other text.`;
-
-  async parseTracklist(rawText: string): Promise<CleanedTrack[]> {
-    const response = await this.callOpenAI({
-      model: 'gpt-4-mini',
-      messages: [
-        { role: 'system', content: this.prompt },
-        { role: 'user', content: rawText }
-      ],
-      temperature: 0.3,
-      max_tokens: 2000
-    });
-
-    return this.validateAndTransform(JSON.parse(response));
-  }
-}
-```
-
-### 6.3 NotSlider Resolver
-```typescript
-class NotSliderService {
-  private readonly baseUrl = 'https://notslider.nl';
-  private readonly retryAttempts = 2;
-
-  async search(track: CleanedTrack): Promise<TrackSearchResult> {
-    const query = `${track.artist} - ${track.title}`;
-
-    for (let attempt = 0; attempt < this.retryAttempts; attempt++) {
-      try {
-        // Search for track
-        const searchUrl = `${this.baseUrl}?q=${encodeURIComponent(query)}`;
-        const html = await fetch(searchUrl).then(r => r.text());
-
-        // Extract first 320kbps MP3 link
-        const linkMatch = html.match(
-          /<a[^>]+href="([^"]+\.mp3)"[^>]*>.*?320\s*kbps/i
-        );
-
-        if (linkMatch) {
-          const downloadUrl = await this.followRedirect(linkMatch[1]);
-
-          return {
-            track,
-            found: true,
-            source: 'notslider',
-            downloadUrl,
-            quality: '320kbps',
-            format: 'mp3'
-          };
-        }
-      } catch (error) {
-        if (attempt === this.retryAttempts - 1) throw error;
-        await this.delay(1000 * Math.pow(2, attempt)); // Exponential backoff
-      }
-    }
-
-    return { track, found: false, error: 'No 320kbps MP3 found' };
-  }
-}
-```
-
-### 6.4 Download Script Builder
-```typescript
-class ScriptBuilder {
-  build(results: TrackSearchResult[], mixTitle: string): string {
-    const sanitizedTitle = this.sanitizeFilename(mixTitle);
-    const timestamp = new Date().toISOString();
-
-    const lines = [
-      '#!/usr/bin/env bash',
-      'set -euo pipefail',
-      '',
-      `# DJ Mix: ${mixTitle}`,
-      `# Generated: ${timestamp}`,
-      `# Tracks: ${results.filter(r => r.found).length}/${results.length}`,
-      '',
-      `mkdir -p "${sanitizedTitle}"`,
-      `cd "${sanitizedTitle}"`,
-      '',
-      '# Download options',
-      'WGET_OPTS="--continue --quiet --show-progress"',
-      ''
-    ];
-
-    results.forEach((result, idx) => {
-      const num = String(idx + 1).padStart(2, '0');
-      const filename = this.sanitizeFilename(
-        `${num}-${result.track.artist}-${result.track.title}.${result.format || 'mp3'}`
-      );
-
-      if (result.found && result.downloadUrl) {
-        lines.push(`# Track ${num}: ${result.track.artist} - ${result.track.title}`);
-        lines.push(`wget $WGET_OPTS -O "${filename}" "${result.downloadUrl}"`);
-      } else {
-        lines.push(`# Track ${num}: NOT FOUND`);
-        lines.push(`echo "SKIPPED: ${result.track.artist} - ${result.track.title}" >&2`);
-      }
-      lines.push('');
-    });
-
-    lines.push('echo "Download complete!"');
-    lines.push(`echo "Downloaded: $(ls -1 *.mp3 2>/dev/null | wc -l) tracks"`);
-
-    return lines.join('\n');
-  }
-
-  private sanitizeFilename(name: string): string {
-    return name
-      .replace(/[^\w\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .toLowerCase()
-      .substring(0, 100); // Filesystem limit
-  }
-}
-```
-
-## 7. OPERATIONAL SPECIFICATIONS
-
-### 7.1 Performance Limits
-| Parameter | Limit | Notes |
-|-----------|-------|-------|
-| Request timeout | 25s | Worker default is 30s |
-| CPU time | 5 min | Via `limits.cpu_ms = 300000` |
-| Memory | 128 MB | Per isolate, non-configurable |
-| Bundle size | 10 MB | Compressed, paid plan |
-| Concurrent requests | ~8/s | Per isolate capacity |
-
-### 7.2 Rate Limiting
-```typescript
-class RateLimiter {
-  private readonly limits = {
-    notslider: { rpm: 60, delayMs: 1000 },
-    soundcloud: { rpm: 100, delayMs: 600 },
-    openai: { rpm: 60, delayMs: 1000 }
-  };
-
-  private lastRequest = new Map<string, number>();
-
-  async throttle(service: string): Promise<void> {
-    const config = this.limits[service];
-    const last = this.lastRequest.get(service) || 0;
-    const elapsed = Date.now() - last;
-
-    if (elapsed < config.delayMs) {
-      await new Promise(r => setTimeout(r, config.delayMs - elapsed));
-    }
-
-    this.lastRequest.set(service, Date.now());
-  }
-}
-```
-
-### 7.3 Error Handling
-```typescript
-enum ErrorCode {
-  INVALID_URL = 'INVALID_URL',
-  YOUTUBE_FETCH_FAILED = 'YOUTUBE_FETCH_FAILED',
-  NO_TRACKS_FOUND = 'NO_TRACKS_FOUND',
-  LLM_PARSE_FAILED = 'LLM_PARSE_FAILED',
-  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
-  TIMEOUT = 'TIMEOUT'
-}
-
-class ServiceError extends Error {
-  constructor(
-    public code: ErrorCode,
-    message: string,
-    public retryable: boolean = false,
-    public details?: any
-  ) {
-    super(message);
-  }
-}
-```
-
-### 7.4 Logging
-```typescript
-interface LogEntry {
-  ts: string;           // ISO 8601
-  level: 'info' | 'warn' | 'error';
-  stage: string;        // Component name
-  jobId: string;       // Request correlation ID
-  message: string;
-  duration?: number;    // Milliseconds
-  [key: string]: any;  // Additional context
-}
-
-// Example log output
-{
-  "ts": "2025-06-19T21:30:12.123Z",
-  "level": "info",
-  "stage": "resolver",
-  "jobId": "xz8k9",
-  "message": "Track search completed",
-  "track": "Artist - Title",
-  "found": true,
-  "source": "notslider",
-  "duration": 207
-}
-```
-
-## 8. DEPLOYMENT
-
-### 8.1 Wrangler Configuration
-```toml
-name = "dj-mix-downloader-mcp"
-main = "src/index.ts"
-compatibility_date = "2025-06-19"
-node_compat = true
-
-[limits]
-cpu_ms = 300000  # 5 minutes
-
-[env.production]
-vars = { ENVIRONMENT = "production" }
-
-[[env.production.secrets]]
-name = "OPENAI_API_KEY"
-
-[build]
-command = "npm run build"
-
-[dev]
-port = 8787
-local_protocol = "http"
-```
-
-### 8.2 Environment Variables
-```bash
-# .dev.vars
-OPENAI_API_KEY=sk-...
-SOUNDCLOUD_CLIENT_ID=optional-client-id
-NOTSLIDER_BASE_URL=https://notslider.nl
-MAX_CONCURRENT_SEARCHES=3
-PREFERRED_QUALITY=320kbps
-```
-
-### 8.3 Deployment Steps
-1. **Install dependencies**: `npm install`
-2. **Configure environment**: Copy `.dev.vars.example` to `.dev.vars`
-3. **Local development**: `wrangler dev --env-file .dev.vars`
-4. **Run tests**: `npm test`
-5. **Verify bundle size**: `wrangler deploy --dry-run`
-6. **Deploy to production**: `wrangler deploy --env production`
-7. **Set secrets**: `wrangler secret put OPENAI_API_KEY --env production`
-
-### 8.4 Cost Analysis
-| Component | Unit Cost | Usage/Day | Daily Cost |
-|-----------|-----------|-----------|------------|
-| GPT-4-mini | $0.0008/mix | 30 mixes | $0.024 |
-| Workers CPU | $0.00001/ms | 90s × 30 | $0.027 |
-| Workers Requests | Free tier | <100k/day | $0.00 |
-| **Total** | | | **~$0.75/month** |
-
-## 9. TESTING STRATEGY
-
-### 9.1 Unit Tests
-```typescript
-// test/youtube.spec.ts
-describe('YouTubeService', () => {
-  it('extracts chapters from JSON-LD', async () => {
-    const mockHtml = readFixture('youtube-chapters.html');
-    const tracks = service.extractChapters(mockHtml);
-    expect(tracks).toHaveLength(15);
-    expect(tracks[0]).toMatchObject({
-      index: 1,
-      timestamp: '0:00',
-      rawText: 'Artist - Track Name'
-    });
-  });
-});
-```
-
-### 9.2 Integration Tests
-```typescript
-// test/e2e.spec.ts
-describe('Full Pipeline', () => {
-  it('processes known mix successfully', async () => {
-    const result = await handler.analyzeYoutubeMix({
-      url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.summary.foundTracks).toBeGreaterThan(10);
-    expect(result.downloadScript.scriptContent).toContain('#!/bin/bash');
-  });
-});
-```
-
-### 9.3 Load Testing
-```bash
-# Using autocannon for load testing
-autocannon -c 10 -d 30 -m POST \
-  -H "Content-Type: application/json" \
-  -b '{"url":"https://youtube.com/watch?v=test"}' \
-  http://localhost:8787/mcp
-```
-
-## 10. SECURITY & PRIVACY
-
-### 10.1 Security Measures
-- No user authentication (single-user design)
-- Input validation on all URLs
-- Sanitized filenames in scripts
-- No PII storage
-- HTTPS-only external requests
-
-### 10.2 API Key Management
-- OpenAI key stored as Cloudflare secret
-- SoundCloud client ID with public fallbacks
-- No keys in code or logs
-
-## 11. MONITORING & OBSERVABILITY
-
-### 11.1 Metrics to Track
-- Success rate by source (NotSlider/SoundCloud/YouTube)
-- Average processing time per mix
-- LLM token usage and costs
-- Error rates by type
-- Bundle size trends
-
-### 11.2 Alerting Thresholds
-- Success rate < 80%
-- Processing time > 20s average
-- Daily cost > $1
-- Error rate > 5%
-
-## 12. FUTURE ENHANCEMENTS
-
-### 12.1 Documented but Disabled
-```typescript
-// Placeholder for future binary service integration
-async function resolveViaYtDlp(track: CleanedTrack): Promise<TrackSearchResult> {
-  // TODO: Implement when external yt-dlp service available
-  throw new Error('yt-dlp service not yet implemented');
-}
-
-// Caching layer (currently disabled)
-async function getCached(key: string): Promise<any> {
-  // TODO: Enable when KV namespace configured
-  return null;
-}
-```
-
-### 12.2 Potential Improvements
-1. **Batch processing**: Multiple mixes in one request
-2. **Webhook notifications**: Async processing with callbacks
-3. **Format conversion**: External service for MP3 conversion
-4. **Metadata enrichment**: MusicBrainz integration
-5. **Duplicate detection**: Fuzzy matching for similar tracks
-
-## 13. APPENDICES
-
-### A. Example MCP Request/Response
-```json
-// Request
-{
-  "method": "analyzeYoutubeMix",
-  "params": {
-    "url": "https://youtube.com/watch?v=abc123"
-  }
-}
-
-// Response
-{
-  "success": true,
-  "id": "job-12345",
-  "downloadScript": {
-    "scriptContent": "IyEvYmluL2Jhc2g=...", // Base64
-    "fileName": "download-epic-mix-2025.sh",
-    "mixTitle": "Epic Mix 2025",
-    "timestamp": "2025-06-19T21:30:00Z",
-    "trackCount": 25
-  },
-  "qualityReport": [
-    {
-      "track": "Artist - Song Title",
-      "source": "notslider",
-      "quality": "320kbps",
-      "format": "mp3",
-      "status": "success"
-    }
-  ],
-  "summary": {
-    "totalTracks": 30,
-    "foundTracks": 25,
-    "failedTracks": 5,
-    "processingTime": 15000,
-    "sourcesUsed": {
-      "notslider": 20,
-      "soundcloud": 5,
-      "youtube": 0
-    },
-    "averageQuality": "320kbps",
-    "estimatedCost": 0.0008
-  }
-}
-```
-
-### B. Common Error Responses
-```json
-{
-  "error": {
-    "code": "INVALID_URL",
-    "message": "Not a valid YouTube URL",
-    "retryable": false
-  }
-}
-```
-
-### C. References
-1. [Cloudflare Workers Limits](https://developers.cloudflare.com/workers/platform/limits/)
-2. [MCP Protocol Specification](https://github.com/modelcontextprotocol/spec)
-3. [OpenAI API Pricing](https://openai.com/pricing)
-4. [YouTube Data API](https://developers.google.com/youtube/v3)
-5. [Wrangler CLI Documentation](https://developers.cloudflare.com/workers/wrangler/)
-</file>
-
-<file path="vibe-tools.config.json">
-{
-  "web": {
-    "provider": "perplexity",
-    "model": "sonar-pro"
-  },
-  "plan": {
-    "fileProvider": "gemini",
-    "thinkingProvider": "gemini",
-    "fileModel": "gemini-2.5-flash-preview-05-20",
-    "thinkingModel": "gemini-2.5-pro-preview-06-05"
-  },
-  "repo": {
-    "provider": "gemini",
-    "model": "gemini-2.5-pro-preview-06-05"
-  },
-  "doc": {
-    "provider": "gemini",
-    "model": "gemini-2.5-pro-preview-06-05"
-  },
-  "ide": "cursor"
-}
-</file>
-
-<file path=".cursor/rules/vibe-tools.mdc">
----
-description: Global Rule. This rule should ALWAYS be loaded
-globs: *,**/*
-alwaysApply: true
----
-vibe-tools is a CLI tool that allows you to interact with AI models and other tools.
-vibe-tools is installed on this machine and it is available to you to execute. You're encouraged to use it.
-
-<vibe-tools Integration>
-# Instructions
-Use the following commands to get AI assistance:
-
-**Direct Model Queries:**
-`vibe-tools ask "<your question>" --provider <provider> --model <model>` - Ask any model from any provider a direct question (e.g., `vibe-tools ask "What is the capital of France?" --provider openai --model o3-mini`). Note that this command is generally less useful than other commands like `repo` or `plan` because it does not include any context from your codebase or repository. In general you should not use the ask command because it does not include any context. The other commands like `web`, `doc`, `repo`, or `plan` are usually better. If you are using it, make sure to include in your question all the information and context that the model might need to answer usefully.
-
-**Ask Command Options:**
---provider=<provider>: AI provider to use (openai, anthropic, perplexity, gemini, modelbox, openrouter, or xai)
---model=<model>: Model to use (required for the ask command)
---reasoning-effort=<low|medium|high>: Control the depth of reasoning for supported models (OpenAI o1/o3-mini models and Claude 4 Sonnet). Higher values produce more thorough responses for complex questions.
---with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context. Can be specified multiple times (e.g., `--with-doc=<url1> --with-doc=<url2>`).
-
-**Implementation Planning:**
-`vibe-tools plan "<query>"` - Generate a focused implementation plan using AI (e.g., `vibe-tools plan "Add user authentication to the login page"`)
-The plan command uses multiple AI models to:
-1. Identify relevant files in your codebase (using Gemini by default)
-2. Extract content from those files
-3. Generate a detailed implementation plan (using OpenAI o3-mini by default)
-
-**Plan Command Options:**
---fileProvider=<provider>: Provider for file identification (gemini, openai, anthropic, perplexity, modelbox, openrouter, or xai)
---thinkingProvider=<provider>: Provider for plan generation (gemini, openai, anthropic, perplexity, modelbox, openrouter, or xai)
---fileModel=<model>: Model to use for file identification
---thinkingModel=<model>: Model to use for plan generation
---with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context for both file identification and planning. Can be specified multiple times (e.g., `--with-doc=<url1> --with-doc=<url2>`).
-
-**Web Search:**
-`vibe-tools web "<your question>"` - Get answers from the web using a provider that supports web search (e.g., Perplexity models and Gemini Models either directly or from OpenRouter or ModelBox) (e.g., `vibe-tools web "latest shadcn/ui installation instructions"`)
-Note: web is a smart autonomous agent with access to the internet and an extensive up to date knowledge base. Web is NOT a web search engine. Always ask the agent for what you want using a proper sentence, do not just send it a list of keywords. In your question to web include the context and the goal that you're trying to acheive so that it can help you most effectively.
-when using web for complex queries suggest writing the output to a file somewhere like local-research/<query summary>.md.
-
-**IMPORTANT: Do NOT use the `web` command for specific URLs.** If a user provides a specific URL (documentation link, GitHub repo, article, etc.), you should always use commands that support the `--with-doc` parameter instead, such as `repo`, `plan`, `doc`, or `ask`. Using `--with-doc` ensures the exact content of the URL is processed correctly and completely.
-
-**Web Command Options:**
---provider=<provider>: AI provider to use (perplexity, gemini, modelbox, or openrouter)
-
-**Repository Context:**
-`vibe-tools repo "<your question>" [--subdir=<path>] [--from-github=<username/repo>] [--with-doc=<doc_url>...]` - Get context-aware answers about this repository using Google Gemini (e.g., `vibe-tools repo "explain authentication flow"`)
-Use the optional `--subdir` parameter to analyze a specific subdirectory instead of the entire repository (e.g., `vibe-tools repo "explain the code structure" --subdir=src/components`). Use the optional `--from-github` parameter to analyze a remote GitHub repository without cloning it locally (e.g., `vibe-tools repo "explain the authentication system" --from-github=username/repo-name`). Use the optional `--with-doc` parameter multiple times to include content from several URLs as additional context (e.g., `vibe-tools repo "summarize findings" --with-doc=https://example.com/spec1 --with-doc=https://example.com/spec2`).
-
-**Documentation Generation:**
-`vibe-tools doc [options] [--with-doc=<doc_url>...]` - Generate comprehensive documentation for this repository (e.g., `vibe-tools doc --output docs.md`). Can incorporate document context from multiple URLs (e.g., `vibe-tools doc --with-doc=https://example.com/existing-docs --with-doc=https://example.com/new-spec`).
-
-**YouTube Video Analysis:**
-`vibe-tools youtube "<youtube-url>" [question] [--type=<summary|transcript|plan|review|custom>]` - Analyze YouTube videos and generate detailed reports (e.g., `vibe-tools youtube "https://youtu.be/43c-Sm5GMbc" --type=summary`)
-Note: The YouTube command requires a `GEMINI_API_KEY` to be set in your environment or .vibe-tools.env file as the GEMINI API is the only interface that supports YouTube analysis.
-
-**GitHub Information:**
-`vibe-tools github pr [number]` - Get the last 10 PRs, or a specific PR by number (e.g., `vibe-tools github pr 123`)
-`vibe-tools github issue [number]` - Get the last 10 issues, or a specific issue by number (e.g., `vibe-tools github issue 456`)
-
-**ClickUp Information:**
-`vibe-tools clickup task <task_id>` - Get detailed information about a ClickUp task including description, comments, status, assignees, and metadata (e.g., `vibe-tools clickup task "task_id"`)
-
-**Wait Command:**
-`vibe-tools wait <seconds>` - Pauses execution for the specified number of seconds (e.g., `vibe-tools wait 5` to wait for 5 seconds).
-
-**Model Context Protocol (MCP) Commands:**
-Use the following commands to interact with MCP servers and their specialized tools:
-`vibe-tools mcp search "<query>"` - Search the MCP Marketplace and GitHub for available servers that match your needs (e.g., `vibe-tools mcp search "git repository management"`)
-`vibe-tools mcp run "<query>"` - Execute MCP server tools using natural language queries (e.g., `vibe-tools mcp run "list files in the current directory" --provider=openrouter`). The query must include sufficient information for vibe-tools to determine which server to use, provide plenty of context.
-
-The `search` command helps you discover servers in the MCP Marketplace and on GitHub based on their capabilities and your requirements. The `run` command automatically selects and executes appropriate tools from these servers based on your natural language queries. If you want to use a specific server include the server name in your query. E.g. `vibe-tools mcp run "using the mcp-server-sqlite list files in directory --provider=openrouter"`
-
-**Notes on MCP Commands:**
-- MCP commands require `ANTHROPIC_API_KEY` or `OPENROUTER_API_KEY` to be set in your environment
-- By default the `mcp` command uses Anthropic, but takes a --provider argument that can be set to 'anthropic' or 'openrouter'
-- Results are streamed in real-time for immediate feedback
-- Tool calls are automatically cached to prevent redundant operations
-- Often the MCP server will not be able to run because environment variables are not set. If this happens ask the user to add the missing environment variables to the cursor tools env file at ~/.vibe-tools/.env
-
-**Stagehand Browser Automation:**
-`vibe-tools browser open <url> [options]` - Open a URL and capture page content, console logs, and network activity (e.g., `vibe-tools browser open "https://example.com" --html`)
-`vibe-tools browser act "<instruction>" --url=<url | 'current'> [options]` - Execute actions on a webpage using natural language instructions (e.g., `vibe-tools browser act "Click Login" --url=https://example.com`)
-`vibe-tools browser observe "<instruction>" --url=<url> [options]` - Observe interactive elements on a webpage and suggest possible actions (e.g., `vibe-tools browser observe "interactive elements" --url=https://example.com`)
-`vibe-tools browser extract "<instruction>" --url=<url> [options]` - Extract data from a webpage based on natural language instructions (e.g., `vibe-tools browser extract "product names" --url=https://example.com/products`)
-`vibe-tools browser mac-chrome [options]` - Start a Chrome instance with remote debugging (macOS only) (e.g., `vibe-tools browser mac-chrome --debug`, `vibe-tools browser mac-chrome --lite`)
-
-**Notes on Browser Commands:**
-- All browser commands are stateless unless --connect-to is used to connect to a long-lived interactive session. In disconnected mode each command starts with a fresh browser instance and closes it when done.
-- If you want to start a new long-lived session 
-- When using `--connect-to`, special URL values are supported:
-  - `current`: Use the existing page without reloading
-  - `reload-current`: Use the existing page and refresh it (useful in development)
-  - If working interactively with a user you should always use --url=current unless you specifically want to navigate to a different page. Setting the url to anything else will cause a page refresh loosing current state.
-- Multi step workflows involving state or combining multiple actions are supported in the `act` command using the pipe (|) separator (e.g., `vibe-tools browser act "Click Login | Type 'user@example.com' into email | Click Submit" --url=https://example.com`)
-- Video recording is available for all browser commands using the `--video=<directory>` option. This will save a video of the entire browser interaction at 1280x720 resolution. The video file will be saved in the specified directory with a timestamp.
-- DO NOT ask browser act to "wait" for anything, the wait command is currently disabled in Stagehand.
-
-**Tool Recommendations:**
-- `vibe-tools web` is best for general web information not specific to the repository. Generally call this without additional arguments.
-- `vibe-tools repo` is ideal for repository-specific questions, planning, code review and debugging. E.g. `vibe-tools repo "Review recent changes to command error handling looking for mistakes, omissions and improvements"`. Generally call this without additional arguments.
-- `vibe-tools plan` is ideal for planning tasks. E.g. `vibe-tools plan "Adding authentication with social login using Google and Github"`. Generally call this without additional arguments.
-- `vibe-tools doc` generates documentation for local or remote repositories.
-- `vibe-tools youtube` analyzes YouTube videos to generate summaries, transcripts, implementation plans, or custom analyses
-- `vibe-tools browser` is useful for testing and debugging web apps and uses Stagehand
-- `vibe-tools mcp` enables interaction with specialized tools through MCP servers (e.g., for Git operations, file system tasks, or custom tools)
-- **URLS:** For any specific URL (documentation, article, reference, spec, GitHub repo, etc.), ALWAYS use a command with the `--with-doc=<url>` parameter rather than the `web` command. Examples: `vibe-tools repo "How should I implement this feature based on the spec?" --with-doc=https://example.com/spec.pdf` or `vibe-tools ask "What does this document say about authentication?" --with-doc=https://example.com/auth-doc.html`
-- When implementing features based on documentation, specifications, or any external content, always use the `--with-doc=<url>` flag instead of built-in web search. For example: `vibe-tools plan "Implement login page according to specs" --with-doc=https://example.com/specs.pdf` or `vibe-tools repo "How should I implement this feature?" --with-doc=https://example.com/feature-spec.md`.
-- When a user provides a specific URL for documentation or reference material, always use the `--with-doc=<url>` flag with that URL rather than attempting to search for or summarize the content independently. This ensures the exact document is used as context.
-
-**Running Commands:**
-1. Use `vibe-tools <command>` to execute commands (make sure vibe-tools is installed globally using npm install -g vibe-tools so that it is in your PATH)
-
-**General Command Options (Supported by all commands):**
---provider=<provider>: AI provider to use (openai, anthropic, perplexity, gemini, openrouter, modelbox, or xai). If provider is not specified, the default provider for that task will be used.
---model=<model name>: Specify an alternative AI model to use. If model is not specified, the provider's default model for that task will be used.
---max-tokens=<number>: Control response length
---save-to=<file path>: Save command output to a file (in *addition* to displaying it)
---debug: Show detailed logs and error information
---web: Enable web search capabilities for supported models (currently Gemini models) across all commands
-
-**Repository Command Options:**
---provider=<provider>: AI provider to use (gemini, openai, openrouter, perplexity, modelbox, anthropic, or xai)
---model=<model>: Model to use for repository analysis
---max-tokens=<number>: Maximum tokens for response
---from-github=<GitHub username>/<repository name>[@<branch>]: Analyze a remote GitHub repository without cloning it locally
---subdir=<path>: Analyze a specific subdirectory instead of the entire repository
---with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context. Can be specified multiple times.
-
-**Documentation Command Options:**
---from-github=<GitHub username>/<repository name>[@<branch>]: Generate documentation for a remote GitHub repository
---provider=<provider>: AI provider to use (gemini, openai, openrouter, perplexity, modelbox, anthropic, or xai)
---model=<model>: Model to use for documentation generation
---max-tokens=<number>: Maximum tokens for response
---with-doc=<doc_url>: Fetch content from one or more document URLs and include it as context. Can be specified multiple times.
-
-**YouTube Command Options:**
---type=<summary|transcript|plan|review|custom>: Type of analysis to perform (default: summary)
-
-**GitHub Command Options:**
---from-github=<GitHub username>/<repository name>[@<branch>]: Access PRs/issues from a specific GitHub repository
-
-**Browser Command Options (for 'open', 'act', 'observe', 'extract'):**
---console: Capture browser console logs (enabled by default, use --no-console to disable)
---html: Capture page HTML content (disabled by default)
---network: Capture network activity (enabled by default, use --no-network to disable)
---screenshot=<file path>: Save a screenshot of the page
---timeout=<milliseconds>: Set navigation timeout (default: 120000ms for Stagehand operations, 30000ms for navigation)
---viewport=<width>x<height>: Set viewport size (e.g., 1280x720). When using --connect-to, viewport is only changed if this option is explicitly provided
---headless: Run browser in headless mode (default: true)
---no-headless: Show browser UI (non-headless mode) for debugging
---connect-to=<port>: Connect to existing Chrome instance. Special values: 'current' (use existing page), 'reload-current' (refresh existing page)
---wait=<time:duration or selector:css-selector>: Wait after page load (e.g., 'time:5s', 'selector:#element-id')
---video=<directory>: Save a video recording (1280x720 resolution, timestamped subdirectory). Not available when using --connect-to
---url=<url>: Required for `act`, `observe`, and `extract` commands. Url to navigate to before the main command or one of the special values 'current' (to stay on the current page without navigating or reloading) or 'reload-current' (to reload the current page)
---evaluate=<string>: JavaScript code to execute in the browser before the main command
-
-**Nicknames**
-Users can ask for these tools using nicknames
-Gemini is a nickname for vibe-tools repo
-Perplexity is a nickname for vibe-tools web
-Stagehand is a nickname for vibe-tools browser
-If people say "ask Gemini" or "ask Perplexity" or "ask Stagehand" they mean to use the `vibe-tools` command with the `repo`, `web`, or `browser` commands respectively.
-
-**Xcode Commands:**
-`vibe-tools xcode build [buildPath=<path>] [destination=<destination>]` - Build Xcode project and report errors.
-**Build Command Options:**
---buildPath=<path>: (Optional) Specifies a custom directory for derived build data. Defaults to ./.build/DerivedData.
---destination=<destination>: (Optional) Specifies the destination for building the app (e.g., 'platform=iOS Simulator,name=iPhone 16 Pro'). Defaults to 'platform=iOS Simulator,name=iPhone 16 Pro'.
-
-`vibe-tools xcode run [destination=<destination>]` - Build and run the Xcode project on a simulator.
-**Run Command Options:**
---destination=<destination>: (Optional) Specifies the destination simulator (e.g., 'platform=iOS Simulator,name=iPhone 16 Pro'). Defaults to 'platform=iOS Simulator,name=iPhone 16 Pro'.
-
-`vibe-tools xcode lint` - Run static analysis on the Xcode project to find and fix issues.
-
-**Additional Notes:**
-- For detailed information, see `node_modules/vibe-tools/README.md` (if installed locally).
-- Configuration is in `vibe-tools.config.json` (or `~/.vibe-tools/config.json`).
-- API keys are loaded from `.vibe-tools.env` (or `~/.vibe-tools/.env`).
-- ClickUp commands require a `CLICKUP_API_TOKEN` to be set in your `.vibe-tools.env` file.
-- Available models depend on your configured provider (OpenAI, Anthropic, xAI, etc.) in `vibe-tools.config.json`.
-- repo has a limit of 2M tokens of context. The context can be reduced by filtering out files in a .repomixignore file.
-- problems running browser commands may be because playwright is not installed. Recommend installing playwright globally.
-- MCP commands require `ANTHROPIC_API_KEY` or `OPENROUTER_API_KEY`
-- **Remember:** You're part of a team of superhuman expert AIs. Work together to solve complex problems.
-- **Repomix Configuration:** You can customize which files are included/excluded during repository analysis by creating a `repomix.config.json` file in your project root. This file will be automatically detected by `repo`, `plan`, and `doc` commands.
-
-<!-- vibe-tools-version: 0.62.7 -->
-</vibe-tools Integration>
-</file>
-
 <file path="src/app.ts">
 import { Hono } from "hono";
 import {
@@ -2587,87 +1787,6 @@ app.post("/approve", async (c) => {
 	);
 });
 export default app;
-</file>
-
-<file path="src/index.ts">
-import app from "./app";
-import { McpAgent } from "agents/mcp";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { z } from "zod";
-import OAuthProvider from "@cloudflare/workers-oauth-provider";
-import { loadWorkerConfig, WorkerConfig } from "./types";
-import { AnalyzeYoutubeMixHandler } from "./handlers/analyzeYoutubeMix";
-import { ExtractTracksOnlyHandler } from "./handlers/extractTracksOnly";
-import { CleanTracksOnlyHandler } from "./handlers/cleanTracksOnly";
-import { GenerateScriptOnlyHandler } from "./handlers/generateScriptOnly";
-export class DJMixDownloaderMCP extends McpAgent {
-	server = new McpServer({
-		name: "DJ Mix Track Downloader",
-		version: "1.0.0",
-	});
-	async init() {
-		// Load configuration from environment
-		const config = loadWorkerConfig(globalThis as any);
-		// Main handler - complete pipeline from YouTube URL to download script
-		this.server.tool("analyzeYoutubeMix", {
-			url: z.string().describe("YouTube URL of the DJ mix video"),
-			skipLLMCleanup: z.boolean().optional().describe("Skip LLM track name cleanup (default: false)"),
-			customOutputPath: z.string().optional().describe("Custom output path for downloads (default: './downloads')"),
-			maxTracks: z.number().optional().describe("Maximum number of tracks to process (default: unlimited)")
-		}, async (args) => {
-			const handler = new AnalyzeYoutubeMixHandler(config);
-			const result = await handler.handle(args);
-			return {
-				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-			};
-		});
-		// Utility handler - extract tracks only
-		this.server.tool("extractTracksOnly", {
-			url: z.string().describe("YouTube URL of the DJ mix video"),
-			includeTimestamps: z.boolean().optional().describe("Include timestamps in track data (default: false)")
-		}, async (args) => {
-			const handler = new ExtractTracksOnlyHandler(config);
-			const result = await handler.handle(args);
-			return {
-				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-			};
-		});
-		// Utility handler - clean tracks only
-		this.server.tool("cleanTracksOnly", {
-			tracks: z.array(z.string()).describe("Array of raw track strings to clean"),
-			provider: z.enum(["openai"]).optional().describe("LLM provider to use (default: 'openai')")
-		}, async (args) => {
-			const handler = new CleanTracksOnlyHandler(config);
-			const result = await handler.handle(args);
-			return {
-				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-			};
-		});
-		// Utility handler - generate script only
-		this.server.tool("generateScriptOnly", {
-			searchResults: z.array(z.any()).describe("Array of track search results"),
-			mixTitle: z.string().describe("Title of the DJ mix")
-		}, async (args) => {
-			const handler = new GenerateScriptOnlyHandler(config);
-			const result = await handler.handle(args);
-			return {
-				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
-			};
-		});
-	}
-}
-// Export the OAuth handler as the default
-export default new OAuthProvider({
-	apiRoute: "/sse",
-	// TODO: fix these types
-	// @ts-expect-error
-	apiHandler: DJMixDownloaderMCP.mount("/sse"),
-	// @ts-expect-error
-	defaultHandler: app,
-	authorizeEndpoint: "/authorize",
-	tokenEndpoint: "/token",
-	clientRegistrationEndpoint: "/register",
-});
 </file>
 
 <file path="src/utils.ts">
@@ -3352,6 +2471,55 @@ dist
 .wrangler/
 </file>
 
+<file path=".repomixignore">
+# Dependencies
+node_modules/
+package-lock.json
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Temporary folders
+tmp/
+temp/
+
+# Static assets that don't need analysis
+static/img/
+img/
+</file>
+
 <file path="biome.json">
 {
 	"$schema": "https://biomejs.dev/schemas/2.0.0/schema.json",
@@ -3402,6 +2570,849 @@ dist
 		"useIgnoreFile": true
 	}
 }
+</file>
+
+<file path="project_description.md">
+# DJ Mix Track Downloader MCP Server - Unified Design Document
+
+## Executive Summary
+
+The DJ Mix Track Downloader is a Model Context Protocol (MCP) server deployed as a Cloudflare Worker that analyzes YouTube DJ mix videos, extracts track lists from descriptions/chapters, cleans track names using Claude 3.5 Haiku (configurable), searches for high-quality download URLs using a waterfall approach (NotSlider → SoundCloud → YouTube-dl fallback), and generates executable shell scripts for downloading tracks. The service prioritizes 320kbps MP3 files, operates within Cloudflare's constraints (10MB bundle, 128MB RAM, 5-minute CPU limit), and costs approximately $0.0024 per mix processed.
+
+## 1. PROJECT OVERVIEW
+
+### 1.1 Purpose
+Create an MCP server for educational/personal use that automates the process of:
+- Extracting track lists from YouTube DJ mixes
+- Finding high-quality (320kbps) download sources
+- Generating download scripts with quality reporting
+
+### 1.2 Core Workflow
+```
+YouTube URL → Extract Tracks → LLM Cleanup → Multi-Platform Search → Download Script + Report
+```
+
+### 1.3 Key Constraints
+- **Runtime**: Cloudflare Workers (no binary execution, no ffmpeg/yt-dlp)
+- **Memory**: 128MB per isolate (hard limit)
+- **CPU Time**: 5 minutes maximum per request
+- **Bundle Size**: ≤10MB compressed (paid plan)
+- **Cost Target**: <$25/month (~30 mixes/day)
+
+## 2. TECHNOLOGY STACK
+
+### 2.1 Core Technologies
+| Component | Technology | Rationale |
+|-----------|------------|-----------|
+| Runtime | Cloudflare Workers | Edge deployment, no server ops |
+| Language | TypeScript 5.x | Type safety, native Worker support |
+| Framework | MCP SDK TypeScript v1.0.0+ | Standardized protocol |
+| LLM | Anthropic Claude 3.5 Haiku (configurable) | Cost-effective ($0.80/1M in, $4.00/1M out) |
+| Primary Source | NotSlider.nl | Guaranteed 320kbps MP3s |
+| Package Manager | npm + Wrangler 3.x | Cloudflare standard tooling |
+| Testing | Vitest + MSW | Worker-compatible testing |
+
+### 2.2 Dependencies
+```json
+{
+  "dependencies": {
+    "@modelcontextprotocol/sdk-typescript": "^1.0.0",
+    "node-fetch": "^3.3.2",
+    "cheerio": "^1.0.0-rc.12",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^3.0.0",
+    "vitest": "^2.0.0",
+    "msw": "^2.0.0"
+  }
+}
+```
+
+### 2.3 Platform Integrations
+1. **YouTube** - Track extraction via HTML scraping
+2. **NotSlider.nl** - Primary 320kbps MP3 source
+3. **SoundCloud API v2** - Secondary source (optional)
+4. **YouTube-dl API** - Tertiary fallback (external service)
+5. **Anthropic API** - Track name cleanup (configurable model)
+
+## 3. SYSTEM ARCHITECTURE
+
+### 3.1 Repository Structure
+```
+dj-mix-downloader-mcp/
+├── wrangler.toml
+├── .dev.vars.example        # ANTHROPIC_API_KEY, SOUNDCLOUD_CLIENT_ID
+├── src/
+│   ├── index.ts            # MCP server entry point
+│   ├── handlers/
+│   │   ├── analyzeYoutubeMix.ts
+│   │   ├── extractTracksOnly.ts
+│   │   ├── cleanTracksOnly.ts
+│   │   └── generateScriptOnly.ts
+│   ├── services/
+│   │   ├── youtube/
+│   │   │   ├── fetchHtml.ts
+│   │   │   ├── extractChapters.ts
+│   │   │   └── extractDescription.ts
+│   │   ├── llm/
+│   │   │   └── parseTracklist.ts
+│   │   ├── resolver/
+│   │   │   ├── notslider.ts
+│   │   │   ├── soundcloud.ts
+│   │   │   └── youtubeDl.ts
+│   │   └── script/
+│   │       └── buildScript.ts
+│   ├── types/
+│   │   └── index.ts
+│   └── utils/
+│       ├── logger.ts
+│       ├── rateLimiter.ts
+│       └── validation.ts
+└── test/
+    └── *.spec.ts
+```
+
+### 3.2 Data Flow Diagram
+```
+1. MCP Request (analyzeYoutubeMix)
+   │
+   ├─▶ 2. YouTube HTML Fetch (25s timeout)
+   │      └─▶ Extract chapters (JSON-LD) or description
+   │
+   ├─▶ 3. LLM Track Parsing (Claude 3.5 Haiku)
+   │      └─▶ Structured JSON: [{artist, title, certainty}]
+   │
+   ├─▶ 4. Multi-Platform Search (concurrent, rate-limited)
+   │      ├─▶ NotSlider (320kbps MP3)
+   │      ├─▶ SoundCloud (if NotSlider fails)
+   │      └─▶ YouTube-dl API (last resort)
+   │
+   ├─▶ 5. Download Script Generation
+   │      └─▶ Bash script with wget/curl commands
+   │
+   └─▶ 6. Response with script + quality report
+```
+
+## 4. DATA MODELS
+
+### 4.1 Core Types
+```typescript
+// Track representation through the pipeline
+interface RawTrack {
+  index: number;
+  timestamp?: string;      // "1:23:45" format
+  rawText: string;        // Original text from YouTube
+}
+
+interface CleanedTrack {
+  index: number;
+  original: string;
+  artist: string;
+  title: string;
+  remixInfo?: string;     // "(Remix Artist Remix)"
+  certainty: number;      // 0.0-1.0 from LLM
+  isValid: boolean;
+}
+
+interface TrackSearchResult {
+  track: CleanedTrack;
+  found: boolean;
+  source?: 'notslider' | 'soundcloud' | 'youtube';
+  downloadUrl?: string;
+  quality?: string;       // "320kbps", "256kbps", etc.
+  format?: 'mp3' | 'm4a' | 'opus';
+  duration?: number;      // seconds
+  fileSize?: number;      // bytes
+  error?: string;
+}
+
+// Response types
+interface ProcessingSummary {
+  totalTracks: number;
+  foundTracks: number;
+  failedTracks: number;
+  processingTime: number;
+  sourcesUsed: {
+    notslider: number;
+    soundcloud: number;
+    youtube: number;
+  };
+  averageQuality: string;
+  estimatedCost: number;  // in USD
+  modelUsed: string;
+}
+
+interface DownloadScript {
+  scriptContent: string;  // Base64 encoded
+  fileName: string;
+  mixTitle: string;
+  timestamp: string;
+  trackCount: number;
+}
+```
+
+### 4.2 Configuration
+```typescript
+interface WorkerConfig {
+  // Environment variables
+  ANTHROPIC_API_KEY: string;
+  ANTHROPIC_MODEL?: string;        // Default: "claude-3-5-haiku"
+  SOUNDCLOUD_CLIENT_ID?: string;   // Optional, with fallbacks
+
+  // Operational limits
+  MAX_CONCURRENT_SEARCHES: number;  // Default: 3
+  RATE_LIMIT_DELAY_MS: number;     // Default: 1000
+  REQUEST_TIMEOUT_MS: number;       // Default: 25000
+
+  // Quality preferences
+  PREFERRED_QUALITY: '320kbps' | '256kbps' | 'highest';
+  PREFERRED_FORMAT: 'mp3' | 'm4a' | 'any';
+
+  // Service URLs
+  NOTSLIDER_BASE_URL: string;      // Default: "https://notslider.nl"
+  YOUTUBE_DL_API_URL?: string;     // External service endpoint
+}
+```
+
+## 5. MCP HANDLERS
+
+### 5.1 Primary Handler
+```typescript
+// Handler: analyzeYoutubeMix
+// Description: Complete pipeline from YouTube URL to download script
+
+interface AnalyzeYoutubeMixArgs {
+  url: string;                    // YouTube URL (required)
+  skipLLMCleanup?: boolean;      // Default: false
+  customOutputPath?: string;     // Default: "./downloads"
+  maxTracks?: number;            // Limit processing (default: unlimited)
+}
+
+interface AnalyzeYoutubeMixResult {
+  success: boolean;
+  id: string;                    // Unique job ID
+  downloadScript: DownloadScript;
+  qualityReport: QualityReport[];
+  summary: ProcessingSummary;
+  failedTracks: string[];
+  warnings: string[];
+}
+```
+
+### 5.2 Utility Handlers
+```typescript
+// Extract tracks without processing
+interface ExtractTracksOnly {
+  args: { url: string; includeTimestamps?: boolean };
+  result: {
+    mixTitle: string;
+    trackCount: number;
+    tracks: RawTrack[];
+  };
+}
+
+// Clean tracks via LLM
+interface CleanTracksOnly {
+  args: { tracks: string[]; provider?: 'openai' };
+  result: { cleaned: CleanedTrack[]; cost: number };
+}
+
+// Generate script from results
+interface GenerateScriptOnly {
+  args: {
+    searchResults: TrackSearchResult[];
+    mixTitle: string;
+  };
+  result: { script: DownloadScript };
+}
+```
+
+## 6. SERVICE IMPLEMENTATIONS
+
+### 6.1 YouTube Extraction Service
+```typescript
+class YouTubeService {
+  private readonly timeout = 25000;
+
+  async fetchHtml(url: string): Promise<string> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(url, {
+        signal: controller.signal,
+        cf: { cacheTtl: 300 } // 5-minute edge cache
+      });
+      return await response.text();
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  extractChapters(html: string): RawTrack[] | null {
+    // Extract JSON-LD VideoObject.hasPart
+    const jsonLdMatch = html.match(
+      /<script[^>]+type="application\/ld\+json"[^>]*>([^<]+)<\/script>/
+    );
+
+    if (jsonLdMatch) {
+      const data = JSON.parse(jsonLdMatch[1]);
+      // Parse hasPart array for Clip objects
+      return this.parseChapters(data);
+    }
+    return null;
+  }
+
+  extractDescription(html: string): string {
+    // Fallback to raw description
+    const match = html.match(/"shortDescription":"(.*?)"/);
+    return match ? this.unescapeDescription(match[1]) : '';
+  }
+}
+```
+
+### 6.2 LLM Track Parser
+```typescript
+class LLMService {
+  private readonly prompt = `
+You are given raw text from a DJ mix. Extract an ordered JSON array of tracks.
+Each item must have:
+{
+  "index": number,
+  "artist": string,
+  "title": string,
+  "remixInfo": string or null,
+  "certainty": float 0-1
+}
+
+Rules:
+- Remove "feat.", "ft.", "featuring" from artist names
+- Extract remix info like "(Remix Name Remix)"
+- Set certainty based on confidence in parsing
+- Mark unclear entries with certainty < 0.5
+
+Output ONLY valid JSON array, no other text.`;
+
+  async parseTracklist(rawText: string): Promise<CleanedTrack[]> {
+    const model = this.config.ANTHROPIC_MODEL || 'claude-3-5-haiku';
+
+    const response = await this.callAnthropic({
+      model: model,
+      messages: [
+        { role: 'user', content: this.prompt + '\n\n' + rawText }
+      ],
+      max_tokens: 2000,
+      temperature: 0.3
+    });
+
+    return this.validateAndTransform(JSON.parse(response));
+  }
+}
+```
+
+### 6.3 NotSlider Resolver
+```typescript
+class NotSliderService {
+  private readonly baseUrl = 'https://notslider.nl';
+  private readonly retryAttempts = 2;
+
+  async search(track: CleanedTrack): Promise<TrackSearchResult> {
+    const query = `${track.artist} - ${track.title}`;
+
+    for (let attempt = 0; attempt < this.retryAttempts; attempt++) {
+      try {
+        // Search for track
+        const searchUrl = `${this.baseUrl}?q=${encodeURIComponent(query)}`;
+        const html = await fetch(searchUrl).then(r => r.text());
+
+        // Extract first 320kbps MP3 link
+        const linkMatch = html.match(
+          /<a[^>]+href="([^"]+\.mp3)"[^>]*>.*?320\s*kbps/i
+        );
+
+        if (linkMatch) {
+          const downloadUrl = await this.followRedirect(linkMatch[1]);
+
+          return {
+            track,
+            found: true,
+            source: 'notslider',
+            downloadUrl,
+            quality: '320kbps',
+            format: 'mp3'
+          };
+        }
+      } catch (error) {
+        if (attempt === this.retryAttempts - 1) throw error;
+        await this.delay(1000 * Math.pow(2, attempt)); // Exponential backoff
+      }
+    }
+
+    return { track, found: false, error: 'No 320kbps MP3 found' };
+  }
+}
+```
+
+### 6.4 Download Script Builder
+```typescript
+class ScriptBuilder {
+  build(results: TrackSearchResult[], mixTitle: string): string {
+    const sanitizedTitle = this.sanitizeFilename(mixTitle);
+    const timestamp = new Date().toISOString();
+
+    const lines = [
+      '#!/usr/bin/env bash',
+      'set -euo pipefail',
+      '',
+      `# DJ Mix: ${mixTitle}`,
+      `# Generated: ${timestamp}`,
+      `# Tracks: ${results.filter(r => r.found).length}/${results.length}`,
+      '',
+      `mkdir -p "${sanitizedTitle}"`,
+      `cd "${sanitizedTitle}"`,
+      '',
+      '# Download options',
+      'WGET_OPTS="--continue --quiet --show-progress"',
+      ''
+    ];
+
+    results.forEach((result, idx) => {
+      const num = String(idx + 1).padStart(2, '0');
+      const filename = this.sanitizeFilename(
+        `${num}-${result.track.artist}-${result.track.title}.${result.format || 'mp3'}`
+      );
+
+      if (result.found && result.downloadUrl) {
+        lines.push(`# Track ${num}: ${result.track.artist} - ${result.track.title}`);
+        lines.push(`wget $WGET_OPTS -O "${filename}" "${result.downloadUrl}"`);
+      } else {
+        lines.push(`# Track ${num}: NOT FOUND`);
+        lines.push(`echo "SKIPPED: ${result.track.artist} - ${result.track.title}" >&2`);
+      }
+      lines.push('');
+    });
+
+    lines.push('echo "Download complete!"');
+    lines.push(`echo "Downloaded: $(ls -1 *.mp3 2>/dev/null | wc -l) tracks"`);
+
+    return lines.join('\n');
+  }
+
+  private sanitizeFilename(name: string): string {
+    return name
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .toLowerCase()
+      .substring(0, 100); // Filesystem limit
+  }
+}
+```
+
+## 7. OPERATIONAL SPECIFICATIONS
+
+### 7.1 Performance Limits
+| Parameter | Limit | Notes |
+|-----------|-------|-------|
+| Request timeout | 25s | Worker default is 30s |
+| CPU time | 5 min | Via `limits.cpu_ms = 300000` |
+| Memory | 128 MB | Per isolate, non-configurable |
+| Bundle size | 10 MB | Compressed, paid plan |
+| Concurrent requests | ~8/s | Per isolate capacity |
+
+### 7.2 Rate Limiting
+```typescript
+class RateLimiter {
+  private readonly limits = {
+    notslider: { rpm: 60, delayMs: 1000 },
+    soundcloud: { rpm: 100, delayMs: 600 },
+    openai: { rpm: 60, delayMs: 1000 }
+  };
+
+  private lastRequest = new Map<string, number>();
+
+  async throttle(service: string): Promise<void> {
+    const config = this.limits[service];
+    const last = this.lastRequest.get(service) || 0;
+    const elapsed = Date.now() - last;
+
+    if (elapsed < config.delayMs) {
+      await new Promise(r => setTimeout(r, config.delayMs - elapsed));
+    }
+
+    this.lastRequest.set(service, Date.now());
+  }
+}
+```
+
+### 7.3 Error Handling
+```typescript
+enum ErrorCode {
+  INVALID_URL = 'INVALID_URL',
+  YOUTUBE_FETCH_FAILED = 'YOUTUBE_FETCH_FAILED',
+  NO_TRACKS_FOUND = 'NO_TRACKS_FOUND',
+  LLM_PARSE_FAILED = 'LLM_PARSE_FAILED',
+  RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
+  TIMEOUT = 'TIMEOUT'
+}
+
+class ServiceError extends Error {
+  constructor(
+    public code: ErrorCode,
+    message: string,
+    public retryable: boolean = false,
+    public details?: any
+  ) {
+    super(message);
+  }
+}
+```
+
+### 7.4 Logging
+```typescript
+interface LogEntry {
+  ts: string;           // ISO 8601
+  level: 'info' | 'warn' | 'error';
+  stage: string;        // Component name
+  jobId: string;       // Request correlation ID
+  message: string;
+  duration?: number;    // Milliseconds
+  [key: string]: any;  // Additional context
+}
+
+// Example log output
+{
+  "ts": "2025-06-19T21:30:12.123Z",
+  "level": "info",
+  "stage": "resolver",
+  "jobId": "xz8k9",
+  "message": "Track search completed",
+  "track": "Artist - Title",
+  "found": true,
+  "source": "notslider",
+  "duration": 207
+}
+```
+
+## 8. DEPLOYMENT
+
+### 8.1 Wrangler Configuration
+```toml
+name = "dj-mix-downloader-mcp"
+main = "src/index.ts"
+compatibility_date = "2025-06-19"
+node_compat = true
+
+[limits]
+cpu_ms = 300000  # 5 minutes
+
+[env.production]
+vars = { ENVIRONMENT = "production" }
+
+[[env.production.secrets]]
+name = "ANTHROPIC_API_KEY"
+
+[build]
+command = "npm run build"
+
+[dev]
+port = 8787
+local_protocol = "http"
+```
+
+### 8.2 Environment Variables
+```bash
+# .dev.vars
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_MODEL=claude-3-5-haiku  # Optional, defaults to Claude 3.5 Haiku
+SOUNDCLOUD_CLIENT_ID=optional-client-id
+NOTSLIDER_BASE_URL=https://notslider.nl
+MAX_CONCURRENT_SEARCHES=3
+PREFERRED_QUALITY=320kbps
+```
+
+### 8.3 Deployment Steps
+1. **Install dependencies**: `npm install`
+2. **Configure environment**: Copy `.dev.vars.example` to `.dev.vars`
+3. **Local development**: `wrangler dev --env-file .dev.vars`
+4. **Run tests**: `npm test`
+5. **Verify bundle size**: `wrangler deploy --dry-run`
+6. **Deploy to production**: `wrangler deploy --env production`
+7. **Set secrets**: `wrangler secret put ANTHROPIC_API_KEY --env production`
+
+### 8.4 Cost Analysis
+| Component | Unit Cost | Usage/Day | Daily Cost |
+|-----------|-----------|-----------|------------|
+| Claude 3.5 Haiku | $0.0024/mix | 30 mixes | $0.072 |
+| Workers CPU | $0.00001/ms | 90s × 30 | $0.027 |
+| Workers Requests | Free tier | <100k/day | $0.00 |
+| **Total** | | | **~$0.99/month** |
+
+**Cost Breakdown per Mix:**
+- Input tokens: ~1,000 × $0.80/1M = $0.0008
+- Output tokens: ~500 × $4.00/1M = $0.002
+- **Total per mix: ~$0.0028**
+
+**Model Options (2025 Pricing):**
+- **Claude 3.5 Haiku** (default): $0.0028/mix - Fast, cost-effective
+- **Claude Sonnet 4**: $0.0045/mix - Better accuracy, moderate cost
+- **Claude Opus 4**: $0.0225/mix - Highest accuracy, premium cost
+
+## 9. TESTING STRATEGY
+
+### 9.1 Unit Tests
+```typescript
+// test/youtube.spec.ts
+describe('YouTubeService', () => {
+  it('extracts chapters from JSON-LD', async () => {
+    const mockHtml = readFixture('youtube-chapters.html');
+    const tracks = service.extractChapters(mockHtml);
+    expect(tracks).toHaveLength(15);
+    expect(tracks[0]).toMatchObject({
+      index: 1,
+      timestamp: '0:00',
+      rawText: 'Artist - Track Name'
+    });
+  });
+});
+```
+
+### 9.2 Integration Tests
+```typescript
+// test/e2e.spec.ts
+describe('Full Pipeline', () => {
+  it('processes known mix successfully', async () => {
+    const result = await handler.analyzeYoutubeMix({
+      url: 'https://youtube.com/watch?v=dQw4w9WgXcQ'
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.summary.foundTracks).toBeGreaterThan(10);
+    expect(result.downloadScript.scriptContent).toContain('#!/bin/bash');
+  });
+});
+```
+
+### 9.3 Load Testing
+```bash
+# Using autocannon for load testing
+autocannon -c 10 -d 30 -m POST \
+  -H "Content-Type: application/json" \
+  -b '{"url":"https://youtube.com/watch?v=test"}' \
+  http://localhost:8787/mcp
+```
+
+## 10. SECURITY & PRIVACY
+
+### 10.1 Security Measures
+- No user authentication (single-user design)
+- Input validation on all URLs
+- Sanitized filenames in scripts
+- No PII storage
+- HTTPS-only external requests
+
+### 10.2 API Key Management
+- OpenAI key stored as Cloudflare secret
+- SoundCloud client ID with public fallbacks
+- No keys in code or logs
+
+## 11. MONITORING & OBSERVABILITY
+
+### 11.1 Metrics to Track
+- Success rate by source (NotSlider/SoundCloud/YouTube)
+- Average processing time per mix
+- LLM token usage and costs
+- Error rates by type
+- Bundle size trends
+
+### 11.2 Alerting Thresholds
+- Success rate < 80%
+- Processing time > 20s average
+- Daily cost > $1
+- Error rate > 5%
+
+## 12. FUTURE ENHANCEMENTS
+
+### 12.1 Documented but Disabled
+```typescript
+// Placeholder for future binary service integration
+async function resolveViaYtDlp(track: CleanedTrack): Promise<TrackSearchResult> {
+  // TODO: Implement when external yt-dlp service available
+  throw new Error('yt-dlp service not yet implemented');
+}
+
+// Caching layer (currently disabled)
+async function getCached(key: string): Promise<any> {
+  // TODO: Enable when KV namespace configured
+  return null;
+}
+```
+
+### 12.2 Potential Improvements
+1. **Batch processing**: Multiple mixes in one request
+2. **Webhook notifications**: Async processing with callbacks
+3. **Format conversion**: External service for MP3 conversion
+4. **Metadata enrichment**: MusicBrainz integration
+5. **Duplicate detection**: Fuzzy matching for similar tracks
+
+## 13. APPENDICES
+
+### A. Example MCP Request/Response
+```json
+// Request
+{
+  "method": "analyzeYoutubeMix",
+  "params": {
+    "url": "https://youtube.com/watch?v=abc123"
+  }
+}
+
+// Response
+{
+  "success": true,
+  "id": "job-12345",
+  "downloadScript": {
+    "scriptContent": "IyEvYmluL2Jhc2g=...", // Base64
+    "fileName": "download-epic-mix-2025.sh",
+    "mixTitle": "Epic Mix 2025",
+    "timestamp": "2025-06-19T21:30:00Z",
+    "trackCount": 25
+  },
+  "qualityReport": [
+    {
+      "track": "Artist - Song Title",
+      "source": "notslider",
+      "quality": "320kbps",
+      "format": "mp3",
+      "status": "success"
+    }
+  ],
+  "summary": {
+    "totalTracks": 30,
+    "foundTracks": 25,
+    "failedTracks": 5,
+    "processingTime": 15000,
+    "sourcesUsed": {
+      "notslider": 20,
+      "soundcloud": 5,
+      "youtube": 0
+    },
+    "averageQuality": "320kbps",
+    "estimatedCost": 0.0028,
+    "modelUsed": "claude-3-5-haiku"
+  }
+}
+```
+
+### B. Common Error Responses
+```json
+{
+  "error": {
+    "code": "INVALID_URL",
+    "message": "Not a valid YouTube URL",
+    "retryable": false
+  }
+}
+```
+
+### C. References
+1. [Cloudflare Workers Limits](https://developers.cloudflare.com/workers/platform/limits/)
+2. [MCP Protocol Specification](https://github.com/modelcontextprotocol/spec)
+3. [Anthropic API Pricing](https://docs.anthropic.com/en/docs/pricing)
+4. [YouTube Data API](https://developers.google.com/youtube/v3)
+5. [Wrangler CLI Documentation](https://developers.cloudflare.com/workers/wrangler/)
+
+## 14. API KEYS & CONFIGURATION SUMMARY
+
+### Required API Keys
+
+#### 1. **Anthropic API Key** (Required)
+- **Purpose**: Track name cleanup and parsing using configurable Claude models
+- **Cost**: ~$0.0028 per mix processed (Claude 3.5 Haiku)
+- **Setup**:
+  - Get from [Anthropic Console](https://console.anthropic.com/)
+  - Set as Cloudflare secret: `wrangler secret put ANTHROPIC_API_KEY --env production`
+  - For local development: Add to `.dev.vars` file
+
+#### 2. **SoundCloud Client ID** (Optional)
+- **Purpose**: Secondary source for track downloads when NotSlider fails
+- **Setup**:
+  - Register app at [SoundCloud for Developers](https://developers.soundcloud.com/)
+  - Get Client ID from your app settings
+  - Add to `.dev.vars` as `SOUNDCLOUD_CLIENT_ID=your-client-id`
+  - Can use public fallback client IDs if not provided
+
+### Environment Configuration
+
+Create a `.dev.vars` file for local development:
+
+```bash
+# Required
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key-here
+
+# Optional - Model Selection
+ANTHROPIC_MODEL=claude-3-5-haiku  # Default: Claude 3.5 Haiku (most cost-effective)
+# Alternative models:
+# ANTHROPIC_MODEL=claude-sonnet-4  # Better accuracy, moderate cost
+# ANTHROPIC_MODEL=claude-opus-4    # Highest accuracy, premium cost
+
+# Optional - SoundCloud Integration
+SOUNDCLOUD_CLIENT_ID=your-soundcloud-client-id
+
+# Operational settings (with defaults)
+MAX_CONCURRENT_SEARCHES=3
+RATE_LIMIT_DELAY_MS=1000
+REQUEST_TIMEOUT_MS=25000
+PREFERRED_QUALITY=320kbps
+PREFERRED_FORMAT=mp3
+NOTSLIDER_BASE_URL=https://notslider.nl
+```
+
+### Model Cost Comparison (2025 Pricing)
+
+| Model | Input Cost | Output Cost | Cost per Mix | Use Case |
+|-------|------------|-------------|--------------|----------|
+| **Claude 3.5 Haiku** | $0.80/1M | $4.00/1M | $0.0028 | **Default: Fast, cost-effective** |
+| Claude Sonnet 4 | $3.00/1M | $15.00/1M | $0.0045 | Better accuracy, moderate cost |
+| Claude Opus 4 | $15.00/1M | $75.00/1M | $0.0225 | Highest accuracy, premium cost |
+
+### Setup Steps
+
+1. **Get Anthropic API Key**:
+   - Sign up at [Anthropic Console](https://console.anthropic.com/)
+   - Create API key in dashboard
+   - Add billing info (required for API usage)
+
+2. **Optional SoundCloud Setup**:
+   - Go to [SoundCloud for Developers](https://developers.soundcloud.com/)
+   - Register new application
+   - Copy Client ID from app settings
+
+3. **Local Development**:
+   ```bash
+   cp .dev.vars.example .dev.vars
+   # Edit .dev.vars with your API keys
+   npm install
+   wrangler dev --env-file .dev.vars
+   ```
+
+4. **Production Deployment**:
+   ```bash
+   wrangler secret put ANTHROPIC_API_KEY --env production
+   wrangler deploy --env production
+   ```
+
+### Monthly Cost Estimate
+
+| Component | Monthly Cost | Notes |
+|-----------|-------------|-------|
+| Claude 3.5 Haiku | ~$0.99 | 30 mixes/day at $0.0028 each |
+| Cloudflare Workers | ~$0.00 | Free tier covers usage |
+| **Total** | **~$0.99/month** | Very cost-effective |
+
+The project is designed to work with just the Anthropic API key as the minimum requirement, with SoundCloud integration as an optional enhancement for better track coverage. The default Claude 3.5 Haiku model provides the best balance of cost and performance for this use case.
 </file>
 
 <file path="README.md">
@@ -3546,6 +3557,30 @@ rm -rf ~/.mcp-auth
 		"skipLibCheck": true
 	},
 	"include": ["worker-configuration.d.ts", "src/**/*.ts"]
+}
+</file>
+
+<file path="vibe-tools.config.json">
+{
+  "web": {
+    "provider": "perplexity",
+    "model": "sonar-pro"
+  },
+  "plan": {
+    "fileProvider": "gemini",
+    "thinkingProvider": "gemini",
+    "fileModel": "gemini-2.5-flash-preview-05-20",
+    "thinkingModel": "gemini-2.5-pro-preview-06-05"
+  },
+  "repo": {
+    "provider": "gemini",
+    "model": "gemini-2.5-pro-preview-06-05"
+  },
+  "doc": {
+    "provider": "gemini",
+    "model": "gemini-2.5-pro-preview-06-05"
+  },
+  "ide": "cursor"
 }
 </file>
 
@@ -9257,42 +9292,85 @@ declare abstract class WorkflowInstance {
 }
 </file>
 
-<file path="wrangler.jsonc">
-/**
- * For more details on how to configure Wrangler, refer to:
- * https://developers.cloudflare.com/workers/wrangler/configuration/
- */
-{
-	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "crate-digger-mcp",
-	"main": "src/index.ts",
-	"compatibility_date": "2025-03-10",
-	"compatibility_flags": ["nodejs_compat"],
-	"migrations": [
-		{
-			"new_sqlite_classes": ["DJMixDownloaderMCP"],
-			"tag": "v1"
-		}
-	],
-	"durable_objects": {
-		"bindings": [
-			{
-				"class_name": "DJMixDownloaderMCP",
-				"name": "MCP_OBJECT"
-			}
-		]
-	},
-	"kv_namespaces": [
-		{
-			"binding": "OAUTH_KV",
-			"id": "74b80eb341654b13954e8c98619b77b1"
-		}
-	],
-	"observability": {
-		"enabled": true
-	},
-	"assets": { "directory": "./static/", "binding": "ASSETS" }
+<file path="src/index.ts">
+import app from "./app";
+import { McpAgent } from "agents/mcp";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+import OAuthProvider from "@cloudflare/workers-oauth-provider";
+import { loadWorkerConfig, WorkerConfig } from "./types";
+import { AnalyzeYoutubeMixHandler } from "./handlers/analyzeYoutubeMix";
+import { ExtractTracksOnlyHandler } from "./handlers/extractTracksOnly";
+import { CleanTracksOnlyHandler } from "./handlers/cleanTracksOnly";
+import { GenerateScriptOnlyHandler } from "./handlers/generateScriptOnly";
+export class DJMixDownloaderMCP extends McpAgent {
+	server = new McpServer({
+		name: "DJ Mix Track Downloader",
+		version: "1.0.0",
+	});
+	async init() {
+		// Load configuration from environment
+		const config = loadWorkerConfig(globalThis as any);
+		// Main handler - complete pipeline from YouTube URL to download script
+		this.server.tool("analyzeYoutubeMix", {
+			url: z.string().describe("YouTube URL of the DJ mix video"),
+			skipLLMCleanup: z.boolean().optional().describe("Skip LLM track name cleanup (default: false)"),
+			customOutputPath: z.string().optional().describe("Custom output path for downloads (default: './downloads')"),
+			maxTracks: z.number().optional().describe("Maximum number of tracks to process (default: unlimited)")
+		}, async (args) => {
+			const handler = new AnalyzeYoutubeMixHandler(config);
+			const result = await handler.handle(args);
+			return {
+				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+			};
+		});
+		// Utility handler - extract tracks only
+		this.server.tool("extractTracksOnly", {
+			url: z.string().describe("YouTube URL of the DJ mix video"),
+			includeTimestamps: z.boolean().optional().describe("Include timestamps in track data (default: false)")
+		}, async (args) => {
+			const handler = new ExtractTracksOnlyHandler(config);
+			const result = await handler.handle(args);
+			return {
+				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+			};
+		});
+		// Utility handler - clean tracks only
+		this.server.tool("cleanTracksOnly", {
+			tracks: z.array(z.string()).describe("Array of raw track strings to clean"),
+			provider: z.enum(["anthropic"]).optional().describe("LLM provider to use (default: 'anthropic')")
+		}, async (args) => {
+			const handler = new CleanTracksOnlyHandler(config);
+			const result = await handler.handle(args);
+			return {
+				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+			};
+		});
+		// Utility handler - generate script only
+		this.server.tool("generateScriptOnly", {
+			searchResults: z.array(z.any()).describe("Array of track search results"),
+			mixTitle: z.string().describe("Title of the DJ mix")
+		}, async (args) => {
+			const handler = new GenerateScriptOnlyHandler(config);
+			const result = await handler.handle(args);
+			return {
+				content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
+			};
+		});
+	}
 }
+// Export the OAuth handler as the default
+export default new OAuthProvider({
+	apiRoute: "/sse",
+	// TODO: fix these types
+	// @ts-expect-error
+	apiHandler: DJMixDownloaderMCP.mount("/sse"),
+	// @ts-expect-error
+	defaultHandler: app,
+	authorizeEndpoint: "/authorize",
+	tokenEndpoint: "/token",
+	clientRegistrationEndpoint: "/register",
+});
 </file>
 
 <file path="package.json">
@@ -9301,6 +9379,7 @@ declare abstract class WorkflowInstance {
 	"version": "0.0.0",
 	"private": true,
 	"scripts": {
+		"build": "tsc",
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"format": "biome format --write",
@@ -9325,6 +9404,37 @@ declare abstract class WorkflowInstance {
 		"workers-mcp": "^0.0.13",
 		"wrangler": "^4.20.3"
 	}
+}
+</file>
+
+<file path="wrangler.jsonc">
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "crate-digger-mcp",
+	"main": "src/index.ts",
+	"compatibility_date": "2025-03-10",
+	"compatibility_flags": ["nodejs_compat"],
+	"kv_namespaces": [
+		{
+			"binding": "OAUTH_KV",
+			"id": "74b80eb341654b13954e8c98619b77b1"
+		}
+	],
+	"migrations": [
+		{
+			"tag": "delete-old-mcp-class",
+			"new_classes": [],
+			"deleted_classes": ["MyMCP"]
+		}
+	],
+	"observability": {
+		"enabled": true
+	},
+	"assets": { "directory": "./static/", "binding": "ASSETS" }
 }
 </file>
 

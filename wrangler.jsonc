@@ -11,14 +11,7 @@
 	"kv_namespaces": [
 		{
 			"binding": "OAUTH_KV",
-			"id": "74b80eb341654b13954e8c98619b77b1"
-		}
-	],
-	"migrations": [
-		{
-			"tag": "delete-old-mcp-class",
-			"new_classes": [],
-			"deleted_classes": ["MyMCP"]
+			"id": "41b82f56a7724903ad5d00deb926a973"
 		}
 	],
 	"observability": {
