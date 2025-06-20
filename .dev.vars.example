@@ -1,0 +1,27 @@
+# DJ Mix Track Downloader MCP Server Environment Variables
+# Copy this file to .dev.vars and fill in your actual values
+
+# Required: Anthropic API Key for Claude track parsing
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-api-key-here
+
+# Optional: Anthropic Model Selection (default: claude-3-5-haiku)
+# ANTHROPIC_MODEL=claude-3-5-haiku  # Default: Claude 3.5 Haiku (most cost-effective)
+# Alternative models:
+# ANTHROPIC_MODEL=claude-sonnet-4  # Better accuracy, moderate cost
+# ANTHROPIC_MODEL=claude-opus-4    # Highest accuracy, premium cost
+
+# Optional: SoundCloud Client ID (for future SoundCloud integration)
+# SOUNDCLOUD_CLIENT_ID=your-soundcloud-client-id
+
+# Optional: Operational limits (defaults shown)
+# MAX_CONCURRENT_SEARCHES=3
+# RATE_LIMIT_DELAY_MS=1000
+# REQUEST_TIMEOUT_MS=25000
+
+# Optional: Quality preferences (defaults shown)
+# PREFERRED_QUALITY=320kbps
+# PREFERRED_FORMAT=mp3
+
+# Optional: Service URLs (defaults shown)
+# NOTSLIDER_BASE_URL=https://notslider.nl
+# YOUTUBE_DL_API_URL=https://your-yt-dlp-service.com/api

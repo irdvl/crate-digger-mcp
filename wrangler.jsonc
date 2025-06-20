@@ -14,6 +14,13 @@
 			"id": "74b80eb341654b13954e8c98619b77b1"
 		}
 	],
+	"migrations": [
+		{
+			"tag": "delete-old-mcp-class",
+			"new_classes": [],
+			"deleted_classes": ["MyMCP"]
+		}
+	],
 	"observability": {
 		"enabled": true
 	},
