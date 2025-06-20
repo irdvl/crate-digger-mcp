@@ -1,0 +1,21 @@
+{
+  "web": {
+    "provider": "perplexity",
+    "model": "sonar-pro"
+  },
+  "plan": {
+    "fileProvider": "gemini",
+    "thinkingProvider": "gemini",
+    "fileModel": "gemini-2.5-flash-preview-05-20",
+    "thinkingModel": "gemini-2.5-pro-preview-06-05"
+  },
+  "repo": {
+    "provider": "gemini",
+    "model": "gemini-2.5-pro-preview-06-05"
+  },
+  "doc": {
+    "provider": "gemini",
+    "model": "gemini-2.5-pro-preview-06-05"
+  },
+  "ide": "cursor"
+}
